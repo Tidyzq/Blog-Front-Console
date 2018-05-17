@@ -1,0 +1,29 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended",
+    "tslint-react",
+    "tslint-config-prettier",
+    "tslint-config-tidyzq"
+  ],
+  "jsRules": {},
+  "rules": {
+    "curly": [
+      true,
+      "ignore-same-line"
+    ],
+    "trailing-comma": {
+      "options": {
+        "multiline": {
+          "objects": "always",
+          "arrays": "always",
+          "functions": "always",
+          "typeLiterals": "never"
+        },
+        "singleline": "never"
+      }
+    },
+    "max-classes-per-file": false
+  },
+  "rulesDirectory": []
+}
