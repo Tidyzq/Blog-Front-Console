@@ -1,11 +1,9 @@
-const webpack = require('webpack')
 const webpackMerge = require('webpack-merge')
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const ManifestPlugin = require('webpack-manifest-plugin');
-const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const ManifestPlugin = require('webpack-manifest-plugin')
+const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const webpackBaseConfig = require('./webpack.config.base')
 const paths = require('./paths')
@@ -13,6 +11,8 @@ const paths = require('./paths')
 const shouldGenerateSourceMap = process.env.GENERATE_SOURCEMAP !== 'false'
 
 const publicUrl = process.env.PUBLIC_URL
+
+const showBundleAnalyzerReport = process.argv.some(arg => arg === '--report')
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
@@ -24,7 +24,7 @@ const webpackProdConfig = webpackMerge(webpackBaseConfig, {
   // We generate sourcemaps in production. This is slow but gives good results.
   // You can exclude the *.map files from the build during deployment.
   devtool: shouldGenerateSourceMap ? 'source-map' : false,
-  plugins: [
+  plugins: ([
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({
       inject: true,
@@ -42,7 +42,6 @@ const webpackProdConfig = webpackMerge(webpackBaseConfig, {
         minifyURLs: true,
       },
     }),
-    // Minify the code.
     // Minify the code.
     new UglifyJsPlugin({
       uglifyOptions: {
@@ -99,7 +98,7 @@ const webpackProdConfig = webpackMerge(webpackBaseConfig, {
       // about it being stale, and the cache-busting can be skipped.
       dontCacheBustUrlsMatching: /\.\w{8}\./,
       filename: 'service-worker.js',
-      logger(message) {
+      logger (message) {
         if (message.indexOf('Total precache size is') === 0) {
           // This message occurs for every build and is a bit too noisy.
           return
@@ -116,17 +115,15 @@ const webpackProdConfig = webpackMerge(webpackBaseConfig, {
       navigateFallback: publicUrl + '/index.html',
       // Ignores URLs starting from /__ (useful for Firebase):
       // https://github.com/facebookincubator/create-react-app/issues/2237#issuecomment-302693219
-      navigateFallbackWhitelist: [/^(?!\/__).*/],
+      navigateFallbackWhitelist: [ /^(?!\/__).*/ ],
       // Don't precache sourcemaps (they're large) and build asset manifest:
-      staticFileGlobsIgnorePatterns: [/\.map$/, /asset-manifest\.json$/],
+      staticFileGlobsIgnorePatterns: [ /\.map$/, /asset-manifest\.json$/ ],
     }),
-    // Perform type checking and linting in a separate process to speed up compilation
-    new ForkTsCheckerWebpackPlugin({
-      async: false,
-      tsconfig: paths.appTsConfig,
-      tslint: paths.appTsLint,
-    }),
-  ],
+    // If --report is set, then show the bundle analyzer report
+    showBundleAnalyzerReport
+      ? new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)()
+      : null,
+  ]).filter(Boolean),
 })
 
 module.exports = webpackProdConfig

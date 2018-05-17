@@ -40,7 +40,7 @@ if (!checkRequiredFiles([ paths.appHtml, ...paths.appEntries ])) {
 const parseJSON = json => {
   try {
     return JSON.parse(json)
-  } catch {
+  } catch (e) {
     return null
   }
 }
@@ -69,7 +69,7 @@ if (process.env.HOST) {
 // run on a different port. `choosePort()` Promise resolves to the next free port.
 choosePort(HOST, DEFAULT_PORT)
   .then(port => {
-    if (port == null) {
+    if (port === null) {
       // We have not found a port.
       return
     }
@@ -98,7 +98,7 @@ choosePort(HOST, DEFAULT_PORT)
       openBrowser(urls.localUrlForBrowser)
     });
 
-    ['SIGINT', 'SIGTERM'].forEach(function (sig) {
+    [ 'SIGINT', 'SIGTERM' ].forEach(function (sig) {
       process.on(sig, function () {
         devServer.close()
         process.exit()

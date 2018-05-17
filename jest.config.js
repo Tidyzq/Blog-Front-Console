@@ -2,10 +2,10 @@ const paths = require('./config/paths')
 
 module.exports = {
   collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}'
+    'src/**/*.{js,jsx,ts,tsx}',
   ],
   setupFiles: [
-    '<rootDir>/config/polyfills.js'
+    '<rootDir>/config/polyfills.js',
   ],
   // setupTestFrameworkScriptFile: setupTestsFile,
   testMatch: [

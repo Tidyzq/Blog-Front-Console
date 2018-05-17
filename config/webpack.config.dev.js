@@ -2,8 +2,6 @@ const webpack = require('webpack')
 const webpackMerge = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin')
-const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin')
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
 const webpackBaseConfig = require('./webpack.config.base')
 const paths = require('./paths')
@@ -63,13 +61,6 @@ const webpackDevConfig = webpackMerge(webpackBaseConfig, {
     // makes the discovery automatic so you don't have to restart.
     // See https://github.com/facebookincubator/create-react-app/issues/186
     // new WatchMissingNodeModulesPlugin(paths.appNodeModules),
-    // Perform type checking and linting in a separate process to speed up compilation
-    new ForkTsCheckerWebpackPlugin({
-      async: false,
-      watch: paths.appSrc,
-      tsconfig: paths.appTsConfig,
-      tslint: paths.appTsLint,
-    }),
   ],
   // Turn off performance hints during development because we don't do any
   // splitting or minification in interest of speed. These warnings become

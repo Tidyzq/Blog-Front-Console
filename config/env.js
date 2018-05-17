@@ -14,16 +14,16 @@ if (!NODE_ENV) {
 
 // https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
 const dotenvFiles = [
-  path.join(paths.appEnvDefault, '.env'),
-  path.join(paths.appEnvDefault, `${NODE_ENV}.env`),
-  path.join(paths.appDirectory, '.env'),
-  path.join(paths.appDirectory, `.env.${NODE_ENV}`),
+  path.join(paths.appDirectory, `.env.${NODE_ENV}.local`),
   // Don't include `local.env` for `test` environment
   // since normally you expect tests to produce the same
   // results for everyone
   NODE_ENV !== 'test' && path.join(paths.appDirectory, '.env.local'),
-  path.join(paths.appDirectory, `.env.${NODE_ENV}.local`),
-].filter(Boolean)
+  path.join(paths.appDirectory, `.env.${NODE_ENV}`),
+  path.join(paths.appDirectory, '.env'),
+  path.join(paths.appEnvDefault, `${NODE_ENV}.env`),
+  path.join(paths.appEnvDefault, '.env'),
+].filter(Boolean).filter(fs.existsSync)
 
 // Load environment variables from .env* files. Suppress warnings using silent
 // if this file is missing. dotenv will never modify any environment variables
@@ -31,13 +31,11 @@ const dotenvFiles = [
 // https://github.com/motdotla/dotenv
 // https://github.com/motdotla/dotenv-expand
 dotenvFiles.forEach(dotenvFile => {
-  if (fs.existsSync(dotenvFile)) {
-    require('dotenv-expand')(
-      require('dotenv').config({
-        path: dotenvFile,
-      })
-    )
-  }
+  require('dotenv-expand')(
+    require('dotenv').config({
+      path: dotenvFile,
+    })
+  )
 })
 
 // We support resolving modules according to `NODE_PATH`.
@@ -60,7 +58,7 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
 // injected into the application via DefinePlugin in Webpack configuration.
 const REACT_APP = /^REACT_APP_/i
 
-function getClientEnvironment() {
+function getClientEnvironment () {
   const raw = Object.keys(process.env)
     .filter(key => REACT_APP.test(key))
     .reduce(

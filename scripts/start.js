@@ -29,7 +29,7 @@ if (!fs.existsSync(paths.appAssetsIndex)) {
 const parseJSON = json => {
   try {
     return JSON.parse(json)
-  } catch {
+  } catch (e) {
     return null
   }
 }
@@ -53,8 +53,8 @@ const mount = middleware => koaMount(PUBLIC_PATH, middleware)
 
 const serveAssets = serve(paths.appBuild)
 
-router.get('*', (ctx, next) => {
-  ctx.body = fs.createReadStream(path.appAssetsIndex)
+router.get('*', ctx => {
+  ctx.body = fs.createReadStream(paths.appAssetsIndex)
 })
 
 app
