@@ -23,7 +23,9 @@
         "singleline": "never"
       }
     },
-    "max-classes-per-file": false
+    "max-classes-per-file": false,
+    "jsx-no-lambda": false,
+    "jsx-boolean-value": false
   },
   "rulesDirectory": []
 }

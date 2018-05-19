@@ -104,7 +104,6 @@ module.exports = {
     // for React Native Web.
     extensions: [ '.js', '.jsx', '.ts', '.tsx', '.json' ],
     alias: {
-
     },
     plugins: [
       // Prevents users from importing files from outside of src/ (or node_modules/).
@@ -166,10 +165,34 @@ module.exports = {
               },
             },
           },
-          // Compile .css
+          // Compile .css to CSS Module
           {
             test: /\.css$/,
+            include: paths.appSrc, // only use CSS Module in /src
             use: generateStyleLoader(),
+          },
+          // Include .css in other directories
+          // no need to use Postcss and CSS Module
+          {
+            test: /\.css$/,
+            use: styleLoaderResolver(
+              {
+                loader: require.resolve('style-loader'),
+                options: {
+                  hmr: isDevelopment,
+                },
+              },
+              [
+                {
+                  loader: require.resolve('css-loader'),
+                  options: {
+                    importLoaders: 1,
+                    minimize: isProduction,
+                    sourcemap: shouldGenerateSourceMap,
+                  },
+                },
+              ]
+            ),
           },
           // Compile .sass & .scss
           {
@@ -207,7 +230,7 @@ module.exports = {
             // its runtime that would otherwise processed through "file" loader.
             // Also exclude `html` and `json` extensions so they get processed
             // by webpacks internal loaders.
-            exclude: [ /\.(js|jsx|mjs)$/, /\.html$/, /\.json$/ ],
+            exclude: [ /\.js$/, /\.html$/, /\.json$/ ],
             loader: require.resolve('file-loader'),
             options: {
               name: 'static/media/[name].[hash:8].[ext]',
@@ -241,6 +264,8 @@ module.exports = {
       tsconfig: paths.appTsConfig,
       tslint: paths.appTsLint,
     }),
+    // monaco-editor
+    new webpack.IgnorePlugin(/^((fs)|(path)|(os)|(crypto)|(source-map-support))$/, /vs\/language\/typescript\/lib/),
   ],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.

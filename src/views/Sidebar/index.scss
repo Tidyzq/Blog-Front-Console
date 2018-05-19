@@ -1,0 +1,26 @@
+.layout {
+  height: 100%;
+  background: #001529;
+
+  :global {
+    .ant-menu-inline-collapsed > .ant-menu-item,
+    .ant-menu-inline-collapsed > .ant-menu-item-group > .ant-menu-item-group-list > .ant-menu-item,
+    .ant-menu-inline-collapsed > .ant-menu-submenu > .ant-menu-submenu-title {
+      padding: 0 22px !important;
+    }
+    .ant-menu-inline-collapsed {
+      width: 60px;
+    }
+  }
+}
+
+.logo {
+  height: 32px;
+  background: rgba(255, 255, 255, .2);
+  margin: 16px;
+}
+
+header, .footer {
+  background: #001529;
+  padding: 0;
+}

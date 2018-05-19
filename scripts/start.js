@@ -14,8 +14,8 @@ const fs = require('fs')
 const Koa = require('koa')
 const proxy = require('koa-proxies')
 const koaMount = require('koa-mount')
-const Router = require('koa-router')
 const serve = require('koa-static')
+const historyFallback = require('koa2-history-api-fallback')
 
 const paths = require('../config/paths')
 
@@ -40,7 +40,6 @@ const PUBLIC_PATH = process.env.PUBLIC_PATH || '/'
 const PROXY = parseJSON(process.env.PROXY) || {}
 
 const app = new Koa()
-const router = new Router()
 
 Object.keys(PROXY).forEach(proxyPath => {
   app.use(proxy(proxyPath, {
@@ -53,14 +52,11 @@ const mount = middleware => koaMount(PUBLIC_PATH, middleware)
 
 const serveAssets = serve(paths.appBuild)
 
-router.get('*', ctx => {
-  ctx.body = fs.createReadStream(paths.appAssetsIndex)
-})
-
 app
+  .use(historyFallback({
+    index: PUBLIC_PATH + 'index.html',
+  }))
   .use(mount(serveAssets))
-  .use(mount(router.routes()))
-  .use(mount(router.allowedMethods()))
 
 app.listen(PORT, HOST, err => {
   if (err) {

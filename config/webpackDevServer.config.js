@@ -6,6 +6,7 @@ const paths = require('./paths')
 
 const protocol = process.env.HTTPS === 'true' ? 'https' : 'http'
 const host = process.env.HOST || '0.0.0.0'
+const publicUrl = process.env.PUBLIC_URL || ''
 
 module.exports = function (proxy, allowedHost) {
   return {
@@ -73,6 +74,7 @@ module.exports = function (proxy, allowedHost) {
     host,
     overlay: false,
     historyApiFallback: {
+      index: publicUrl + '/index.html',
       // Paths with dots should still use the history fallback.
       // See https://github.com/facebookincubator/create-react-app/issues/387.
       disableDotRule: true,

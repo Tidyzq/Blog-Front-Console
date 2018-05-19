@@ -1,0 +1,55 @@
+.item {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+  height: 3rem;
+  padding: 0.5rem 1rem;
+}
+
+// .item__line-mod {
+//   margin: 0 1rem;
+//   border-bottom: solid 1px #cadbe6;
+// }
+
+.item:hover {
+  background: #EAF3FD;
+}
+
+.type {
+  line-height: 3rem;
+  float: left;
+  width: 4rem;
+  text-align: center;
+}
+
+.type--draft, .type--post, .type--page {
+  // display: inline-block;
+  // line-height: 1rem;
+  // padding: 0.3rem;
+  // width: 2.4rem;
+  color: #fff;
+  border-color: transparent;
+  // border-radius: 4px;
+}
+
+.type--draft {
+  background: #f7ba2a;
+}
+
+.type--post {
+  background: #13ce66;
+}
+
+.type--page {
+  background: #50bfff;
+}
+
+.title {
+  line-height: 2rem;
+  font-size: 1.1rem;
+  color: #171d25;
+}
+
+.detail {
+  margin: 0 8px 0 0;
+}

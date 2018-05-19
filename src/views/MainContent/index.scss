@@ -1,0 +1,17 @@
+.main_content {
+  margin: 24px 16px;
+  padding: 24px;
+  background: #fff;
+}
+
+$GridColumns: 24;
+
+@for $index from 0 to $GridColumns + 1 {
+  .main_content_#{$index} {
+    display: block;
+    width: ($index / $GridColumns) * 100%;
+    float: left;
+    flex: 0 0 auto;
+    overflow: auto;
+  }
+}
