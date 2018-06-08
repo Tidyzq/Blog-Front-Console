@@ -1,7 +1,7 @@
 import React, { StatelessComponent, MouseEventHandler, CSSProperties } from 'react'
 import classNames from 'classnames'
 
-export interface IIconProps {
+export interface IconProps {
   type: string
   fixWidth?: boolean
   className?: string
@@ -18,6 +18,6 @@ const Icon = (({ type, fixWidth, className, ...other }) => (
     }, `fa-${type}`, className)}
     {...other}
   />
-)) as StatelessComponent<IIconProps>
+)) as StatelessComponent<IconProps>
 
 export default Icon

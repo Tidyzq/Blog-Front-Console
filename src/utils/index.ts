@@ -92,7 +92,7 @@ export enum MediaType {
   xxl,
 }
 
-interface IDimension {
+interface Dimension {
   maxWidth: string,
   below: MediaType,
   above: MediaType,
@@ -137,7 +137,7 @@ export const watchMedia = (() => {
         media = m
         listeners.forEach(listener => listener(media))
       }
-      const getResponsiveHandler = (dimension: IDimension) => (mql: MediaQueryList) =>
+      const getResponsiveHandler = (dimension: Dimension) => (mql: MediaQueryList) =>
         setMedia(mql.matches ?
           Math.min(media, dimension.below) :
           Math.max(media, dimension.above) ,

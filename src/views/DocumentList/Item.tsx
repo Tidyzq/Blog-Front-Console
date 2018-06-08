@@ -1,11 +1,11 @@
 import React, { StatelessComponent, Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import { List, Tag } from 'antd'
-import { IDocument } from '@/models/types'
+import { Document } from '@/models/types'
 import styles from './Item.scss'
 
-export interface IDocumentItemProps {
-  document: IDocument
+export interface DocumentItemProps {
+  document: Document
 }
 
 const DocumentItemType: StatelessComponent<{ type: string }>
@@ -27,11 +27,11 @@ const DocumentItemDetail: StatelessComponent<{ type: string, author: number, mod
   </Fragment>
 )
 
-const DocumentItem: StatelessComponent<IDocumentItemProps>
+const DocumentItem: StatelessComponent<DocumentItemProps>
 = ({ document }) => (
   <List.Item actions={[
     <Link key="detail" to={`/documents/${document.id}`}>Detail</Link>,
-    <Link key="edit" to={`/documents/${document.id}`}>Edit</Link>,
+    <Link key="edit" to={`/editor/${document.id}`}>Edit</Link>,
   ]}>
     <List.Item.Meta
       title={

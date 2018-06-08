@@ -4,29 +4,29 @@ import { Bind } from 'lodash-decorators'
 import { BrowserRouter, Route, Switch } from 'react-router-dom'
 
 import { MediaType, watchMedia } from '@/utils'
-import Documents from './Documents/index'
-import Editor from './Editor'
-import Authorization from './Authorization'
-import MainContent from './MainContent'
-import Sidebar from './Sidebar'
-import Header from './Header'
-import Login from './Login'
-import styles from './index.scss'
+import Documents from '@/views/Documents'
+import Editor from '@/views/Editor'
+import Authorization from '@/views/Authorization'
+import MainContent from '@/views/MainContent'
+import Sidebar from '@/views/Sidebar'
+import Header from '@/views/Header'
+import Login from '@/views/Login'
+import styles from './Console.scss'
 
 const { Content } = Layout
 
-export interface IConsoleProps { }
+export interface ConsoleProps { }
 
-export interface IConsoleState {
+export interface ConsoleState {
   collapsed: boolean,
   media: MediaType,
 }
 
-class Console extends PureComponent<IConsoleProps, IConsoleState> {
+class Console extends PureComponent<ConsoleProps, ConsoleState> {
 
   public mediaInfo = watchMedia()
 
-  public state: IConsoleState = {
+  public state: ConsoleState = {
     collapsed: this.mediaShouldCollapse(this.mediaInfo.media),
     media: this.mediaInfo.media,
   }

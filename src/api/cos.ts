@@ -15,11 +15,11 @@ async function getAuthorization (method: string, key: string) {
 const apiUrl = process.env.REACT_APP_COS_API_URL || ''
 const cdnUrl = process.env.REACT_APP_COS_CDN_URL || ''
 
-export interface IBucketContent {
-  ListBucketResult: ICosContent[]
+export interface BucketContent {
+  ListBucketResult: CosContent[]
 }
 
-export interface ICosContent {
+export interface CosContent {
   Key: string
   Size: string
   LastModified: string
@@ -31,7 +31,7 @@ export default {
   async get () {
     const token = await getAuthorization('get', '')
     const { data } = await request.get(apiUrl, { headers: { Authorization: token } })
-    const { ListBucketResult: result } = await xml2js(data) as IBucketContent
+    const { ListBucketResult: result } = await xml2js(data) as BucketContent
     return result
   },
   async put (key: string | undefined, file: File, progress?: () => void) {

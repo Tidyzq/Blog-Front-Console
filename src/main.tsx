@@ -2,10 +2,10 @@ import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 
-import 'antd/dist/antd.css'
-import '@/styles/fontawesome.css'
+import 'font-awesome/css/font-awesome.css'
+
 import registerServiceWorker from './registerServiceWorker'
-import Console from '@/views'
+import Console from '@/views/Console'
 import createStore from '@/store'
 
 const store = createStore()
@@ -17,3 +17,4 @@ render(
   document.getElementById('app'),
 )
 registerServiceWorker()
+

@@ -1,13 +1,11 @@
 import React, { StatelessComponent } from 'react'
-import AntdBreadcrumb from 'antd/lib/breadcrumb'
+import { Breadcrumb as AntdBreadcrumb } from 'antd'
 import styles from './Breadcrumb.scss'
 
-const BreadCrumbItem = AntdBreadcrumb.Item
-
-const BreadCrumb = (({ children }) => (
+const Breadcrumb = (({ children }) => (
   <AntdBreadcrumb className={styles.breadcrumb}>{children}</AntdBreadcrumb>
-)) as StatelessComponent<{}> & { Item: typeof BreadCrumbItem }
+)) as StatelessComponent<{}>
 
-BreadCrumb.Item = BreadCrumbItem
+export const BreadcrumbItem = AntdBreadcrumb.Item
 
-export default BreadCrumb
+export default Breadcrumb

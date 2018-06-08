@@ -41,9 +41,6 @@ const webpackDevConfig = webpackMerge(webpackBaseConfig, {
     filename: 'static/js/bundle.js',
     // There are also additional JS chunk files if you use code splitting.
     chunkFilename: 'static/js/[name].chunk.js',
-    // Workaround for worker loader error 'window is not defined'
-    // https://github.com/webpack/webpack/issues/6642#issuecomment-371087342
-    globalObject: 'this',
   },
   plugins: [
     // Generates an `index.html` file with the <script> injected.

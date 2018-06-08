@@ -1,0 +1,26 @@
+{
+  "presets": [
+    "react-app"
+  ],
+  "plugins": [
+    [
+      "import",
+      [
+        {
+          "libraryName": "antd",
+          "style": "css"
+        },
+        {
+          "libraryName": "lodash",
+          "libraryDirectory": "",
+          "camel2DashComponentName": false,
+          "camel2UnderlineComponentName": false
+        },
+        {
+          "libraryName": "lodash-decorators",
+          "libraryDirectory": ""
+        }
+      ]
+    ]
+  ]
+}

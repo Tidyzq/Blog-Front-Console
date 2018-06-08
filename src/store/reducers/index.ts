@@ -1,8 +1,10 @@
-import login, { IReduxLogin } from './login'
+import login, { LoginState } from './login'
+import entities, { EntitiesState } from './entities'
 import { combineReducers } from 'redux'
 
-export type IRedux = IReduxLogin
+export type State = LoginState & EntitiesState
 
-export default combineReducers<IRedux>({
+export default combineReducers<State>({
   login,
+  entities,
 })

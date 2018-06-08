@@ -1,4 +1,4 @@
-export interface IUser {
+export interface User {
   id: number
   username: string
   password?: string
@@ -6,7 +6,7 @@ export interface IUser {
   avatar: string
 }
 
-export interface IDocument {
+export interface Document {
   id: number
   title: string
   url: string
@@ -17,19 +17,19 @@ export interface IDocument {
   author: number
 }
 
-export type IPost = IDocument
+export type Post = Document
 
-export type IPage = IDocument
+export type Page = Document
 
-export interface ITag {
+export interface Tag {
   id: number
   name: string
   url: string
 }
 
-export interface ITagDocument {
+export interface TagDocument {
   tagId: number
   documentId: number
 }
 
-export type ISetting = any
+export type Setting = any

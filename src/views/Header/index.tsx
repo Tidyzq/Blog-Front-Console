@@ -1,21 +1,9 @@
-import React, { StatelessComponent } from 'react'
-import { Layout } from 'antd'
-import { Portal, PortalTarget } from './Portal'
-import Breadcrumb from './Breadcrumb'
-import styles from './index.scss'
+export { default } from './Header'
 
-export interface IHeaderProps {}
+export { Portal } from './Portal'
 
-const Header = (_ => (
-  <Layout.Header className={styles.header}>
-    <PortalTarget />
-  </Layout.Header>
-)) as StatelessComponent<IHeaderProps> & {
-  Portal: typeof Portal
-  Breadcrumb: typeof Breadcrumb
-}
+export { default as Breadcrumb, BreadcrumbItem } from './Breadcrumb'
 
-Header.Portal = Portal
-Header.Breadcrumb = Breadcrumb
+export { default as Button } from './Button'
 
-export default Header
+export { default as Input } from './Input'

@@ -1,10 +1,10 @@
 import { createStore, applyMiddleware, compose, StoreEnhancerStoreCreator } from 'redux'
-import PromiseMiddleware from 'redux-promise'
-import reducer, { IRedux as IReducer } from './reducers'
-import { IReduxLoginProperty } from './reducers/login'
+import ThunkMiddleware from 'redux-thunk'
+import reducer, { State } from './reducers'
+import { LoginStateProperty } from './reducers/login'
 import localStorageEnhancer from './enhancers/localstorage'
 
-export type IRedux = IReducer
+export type State = State
 
 let composeEnhancers = compose
 
@@ -16,12 +16,12 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const middlewares = [
-  PromiseMiddleware,
+  ThunkMiddleware,
 ]
 
 const enhancer = composeEnhancers<StoreEnhancerStoreCreator>(
   applyMiddleware(...middlewares),
-  localStorageEnhancer<IRedux, IReduxLoginProperty>(
+  localStorageEnhancer<State, LoginStateProperty>(
     'redux',
     state => state.login,
     login => ({ login }),

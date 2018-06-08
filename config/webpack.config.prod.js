@@ -1,6 +1,6 @@
 const webpackMerge = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const ManifestPlugin = require('webpack-manifest-plugin')
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
@@ -80,7 +80,10 @@ const webpackProdConfig = webpackMerge(webpackBaseConfig, {
       sourceMap: shouldGenerateSourceMap,
     }),
     // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
-    new ExtractTextPlugin({
+    // new ExtractTextPlugin({
+    //   filename: 'static/css/[name].[hash:8].css',
+    // }),
+    new MiniCssExtractPlugin({
       filename: 'static/css/[name].[hash:8].css',
     }),
     // Generate a manifest file which contains a mapping of all asset filenames

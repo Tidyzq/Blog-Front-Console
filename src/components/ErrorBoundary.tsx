@@ -1,14 +1,14 @@
 import React, { Component, ErrorInfo } from 'react'
 
-export interface IErrorBoundaryProps {}
+export interface ErrorBoundaryProps {}
 
-export interface IErrorBoundaryState {
+export interface ErrorBoundaryState {
   hasError: boolean
   error: Error | null
   info: ErrorInfo | null
 }
 
-class ErrorBoundary extends Component<IErrorBoundaryProps, IErrorBoundaryState> {
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   public state = {
     hasError: false,

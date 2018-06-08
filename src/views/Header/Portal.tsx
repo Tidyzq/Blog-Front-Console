@@ -5,7 +5,7 @@ import { uniquePush, erase } from '@/utils'
 const elements: ReactNode[] = []
 const listeners: (() => void)[] = []
 
-function update () {
+function notify () {
   listeners.forEach(listener => listener())
 }
 
@@ -28,20 +28,20 @@ export class PortalTarget extends PureComponent {
   }
 }
 
-export interface IPortalProps {
+export interface PortalProps {
   children?: ReactNode
 }
 
-export class Portal extends PureComponent<IPortalProps> {
-  public componentWillReceiveProps (nextProps: IPortalProps) {
+export class Portal extends PureComponent<PortalProps> {
+  public componentWillReceiveProps (nextProps: PortalProps) {
     erase(elements, this.props.children)
     uniquePush(elements, nextProps.children)
-    update()
+    notify()
   }
 
   public componentWillMount () {
     uniquePush(elements, this.props.children)
-    update()
+    notify()
   }
 
   public render () {
@@ -50,6 +50,6 @@ export class Portal extends PureComponent<IPortalProps> {
 
   public componentWillUnmount () {
     erase(elements, this.props.children)
-    update()
+    notify()
   }
 }

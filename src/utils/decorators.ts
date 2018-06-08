@@ -1,17 +1,30 @@
-import { bind, throttle, debounce } from 'lodash'
-
-function lodashDecoratorMixin (func: (...args: any[]) => any) {
+function decoratorMixin (func: (...args: any[]) => any) {
   return (...args: any[]) => (target: any, _: string, descriptor: PropertyDescriptor) => {
-    const { get, set, value } = descriptor
-    if (typeof get === 'function') descriptor.get = func.call(target, get, ...args)
-    if (typeof set === 'function') descriptor.set = func.call(target, set, ...args)
+    const { value } = descriptor
     if (typeof value === 'function') descriptor.value = func.call(target, value, ...args)
     return descriptor
   }
 }
 
-export const Bind = lodashDecoratorMixin(bind)
+const throttleByRAF = <T extends (...args: any[]) => any>(func: T) => {
+  let rAFHandler: number | null = null
+  let rAFCall: boolean = false
+  let rAFThis: any
+  let rAFArgs: any[]
+  return function (this: any, ...args: any[]) {
+    if (rAFHandler === null) {
+      func.apply(this, args)
+      rAFCall = false
+      rAFHandler = requestAnimationFrame(() => {
+        if (rAFCall) func.apply(rAFThis, rAFArgs)
+        rAFHandler = null
+      })
+    } else {
+      rAFThis = this
+      rAFArgs = args
+      rAFCall = true
+    }
+  }
+}
 
-export const Throttle = lodashDecoratorMixin(throttle)
-
-export const Debounce = lodashDecoratorMixin(debounce)
+export const ThrottleByRAF = decoratorMixin(throttleByRAF)

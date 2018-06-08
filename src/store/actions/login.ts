@@ -1,23 +1,48 @@
-import { createAction } from 'redux-actions'
-import { Action } from 'redux-actions'
-import { AxiosResponse } from 'axios'
-import { Auth } from '@/api'
-import { IUser } from '@/models/types'
+import { ActionCreator, Action } from 'redux'
+import { auth } from '@/api'
+import { createThunkAction } from '@/utils/reduxHelper'
+import { User } from '@/models/types'
 
-export enum Actions {
-  Login = 'Login',
-  CheckLogin = 'CheckLogin',
-  Logout = 'Logout',
+export enum LoginActions {
+  UpdateLogin = 'UpdateLogin',
+  ClearLogin = 'ClearLogin',
 }
 
-export type ILoginAction = Action<AxiosResponse<{ user: IUser, accessToken: string }>>
+export interface UpdateLoginAction extends Action<LoginActions.UpdateLogin> {
+  user: User
+  accessToken: string
+}
 
-export type ICheckLoginAction = Action<AxiosResponse<void>>
+export type ClearLoginAction = Action<LoginActions.ClearLogin>
 
-export type ILogoutAction = Action<void>
+export type AnyLoginAction = UpdateLoginAction | ClearLoginAction
 
-export const login = createAction(Actions.Login, Auth.login)
+export const updateLogin = (user: User, accessToken: string): UpdateLoginAction => ({
+  type: LoginActions.UpdateLogin,
+  user,
+  accessToken,
+})
 
-export const checkLogin = createAction(Actions.CheckLogin, Auth.checkLogin)
+export const clearLogin = (): ClearLoginAction => ({
+  type: LoginActions.ClearLogin,
+})
 
-export const logout = createAction(Actions.Logout)
+export const login = (body: { email: string, password: string }) => createThunkAction(async dispatch => {
+  try {
+    const { data: { user, accessToken } } = await auth.login(body)
+    dispatch(updateLogin(user, accessToken))
+  } catch (e) {
+    dispatch(clearLogin())
+  }
+})
+
+export const checkLogin = () => createThunkAction(async dispatch => {
+  try {
+    await auth.checkLogin()
+    // do nothing if login is valid
+  } catch (e) {
+    dispatch(clearLogin())
+  }
+})
+
+export const logout: ActionCreator<ClearLoginAction> = clearLogin

@@ -19,10 +19,10 @@ const shouldGenerateSourceMap = process.env.GENERATE_SOURCEMAP === 'true'
 // In production, we use a plugin to extract that CSS to a file, but
 // in development "style" loader enables hot editing of CSS.
 const styleLoaderResolver = isProduction ?
-  (styleLoader, loaders) => require('extract-text-webpack-plugin').extract({
-    use: loaders.filter(Boolean),
-    fallback: styleLoader,
-  }) :
+  (styleLoader, loaders) => [
+    require('mini-css-extract-plugin').loader,
+    ...loaders.filter(Boolean),
+  ] :
   (styleLoader, loaders) => [
     styleLoader,
     ...loaders.filter(Boolean),
@@ -86,6 +86,9 @@ module.exports = {
       path
         .relative(paths.appSrc, info.absoluteResourcePath)
         .replace(/\\/g, '/'),
+    // Workaround for worker loader error 'window is not defined'
+    // https://github.com/webpack/webpack/issues/6642#issuecomment-371087342
+    globalObject: 'this',
   },
   resolve: {
     // This allows you to set a fallback for where Webpack should look for modules.
@@ -121,6 +124,22 @@ module.exports = {
       // TODO: Disable require.ensure as it's not a standard language feature.
       // We are waiting for https://github.com/facebookincubator/create-react-app/issues/2176.
       // { parser: { requireEnsure: false } },
+      // Process JS with Babel.
+      {
+        test: /\.(tsx?|jsx?|mjs)$/,
+        enforce: 'post',
+        include: paths.appSrc,
+        loader: require.resolve('babel-loader'),
+        options: {
+
+          // This is a feature of `babel-loader` for webpack (not Babel itself).
+          // It enables caching results in ./node_modules/.cache/babel-loader/
+          // directory for faster rebuilds.
+          cacheDirectory: isDevelopment,
+          compact: isProduction,
+          babelrc: paths.appBabelConfig,
+        },
+      },
       {
         // "oneOf" will traverse all following loaders until one will
         // match the requirements. When no loader matches it will fall
@@ -135,21 +154,6 @@ module.exports = {
             options: {
               limit: 10000,
               name: 'static/media/[name].[hash:8].[ext]',
-            },
-          },
-          // Process JS with Babel.
-          {
-            test: /\.(js|jsx|mjs)$/,
-            include: paths.appSrc,
-            loader: require.resolve('babel-loader'),
-            options: {
-
-              // This is a feature of `babel-loader` for webpack (not Babel itself).
-              // It enables caching results in ./node_modules/.cache/babel-loader/
-              // directory for faster rebuilds.
-              cacheDirectory: isDevelopment,
-              compact: isProduction,
-              babelrc: paths.appBabelConfig,
             },
           },
           // Compile .tsx?
@@ -186,7 +190,7 @@ module.exports = {
                 {
                   loader: require.resolve('css-loader'),
                   options: {
-                    importLoaders: 1,
+                    // importLoaders: 1,
                     minimize: isProduction,
                     sourcemap: shouldGenerateSourceMap,
                   },

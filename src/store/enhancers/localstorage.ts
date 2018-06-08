@@ -24,6 +24,7 @@ export default <T extends {}, S>(
       storageState = merge(grow(deserialize(storageValue)), preloadedState)
     }
   } catch (e) {
+    // tslint:disable-next-line
     console.warn('Failed to retrieve initialize state from localStorage:', e)
   }
 
@@ -31,12 +32,11 @@ export default <T extends {}, S>(
 
   store.subscribe(() => {
     const state = store.getState()
-    console.log(state)
 
     try {
-      console.log(key, serialize(picker(state)))
       localStorage.setItem(key, serialize(picker(state)))
     } catch (e) {
+    // tslint:disable-next-line
       console.warn('Failed to persist state to localStorage:', e)
     }
   })
