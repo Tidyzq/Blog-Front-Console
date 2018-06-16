@@ -6,7 +6,7 @@ function decoratorMixin (func: (...args: any[]) => any) {
   }
 }
 
-const throttleByRAF = <T extends (...args: any[]) => any>(func: T) => {
+const throttleWithRAF = <T extends (...args: any[]) => any>(func: T) => {
   let rAFHandler: number | null = null
   let rAFCall: boolean = false
   let rAFThis: any
@@ -27,4 +27,4 @@ const throttleByRAF = <T extends (...args: any[]) => any>(func: T) => {
   }
 }
 
-export const ThrottleByRAF = decoratorMixin(throttleByRAF)
+export const ThrottleWithRAF = decoratorMixin(throttleWithRAF)

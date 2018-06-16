@@ -17,9 +17,9 @@ const Sidebar = (({ collapsed, location, logout }) => (
   <Sider
     trigger={null}
     collapsible
-    collapsedWidth="60"
+    collapsedWidth={60}
     collapsed={collapsed}
-    defaultCollapsed={collapsed}
+    // defaultCollapsed={collapsed}
   >
     <Layout className={styles.layout}>
       <Header style={{ padding: 0 }}>
@@ -70,16 +70,16 @@ const Sidebar = (({ collapsed, location, logout }) => (
               <span>Logout</span>
             </a>
           </Menu.Item>
-          {/* <Menu.Item key="/documents">
-            <Link to="/documents">
-              <Icon type="book" />
-              <span>Documents</span>
-            </Link>
-          </Menu.Item> */}
         </Menu>
       </Footer>
     </Layout>
   </Sider>
 )) as StatelessComponent<SidebarProps>
 
-export default withRouter(connect(undefined, { logout })(Sidebar))
+export default withRouter(
+  connect(null, {
+    logout,
+  })(
+    Sidebar,
+  ),
+)

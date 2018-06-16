@@ -1,11 +1,13 @@
 import React, { StatelessComponent, Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import { List, Tag } from 'antd'
-import { Document } from '@/models/types'
+import { Document, User } from '@/models'
+import TimeFromNow from '@/components/TimeFromNow'
 import styles from './Item.scss'
 
 export interface DocumentItemProps {
   document: Document
+  author: User | undefined
 }
 
 const DocumentItemType: StatelessComponent<{ type: string }>
@@ -18,17 +20,19 @@ const DocumentItemTitle: StatelessComponent<{ title: string }>
   <Fragment>{title}</Fragment>
 )
 
-const DocumentItemDetail: StatelessComponent<{ type: string, author: number, modifiedAt: number }>
+const DocumentItemDetail: StatelessComponent<{ type: string, author: User | undefined, modifiedAt: number }>
  = ({ type, author, modifiedAt }) => (
   <Fragment>
     <DocumentItemType type={type} />
-    <span className={styles.detail}>{author}</span>
-    <span className={styles.detail}>{modifiedAt}</span>
+    {author === undefined ? null : (
+      <span className={styles.detail}>{author.username}</span>
+    )}
+    <span className={styles.detail}><TimeFromNow date={modifiedAt}/></span>
   </Fragment>
 )
 
 const DocumentItem: StatelessComponent<DocumentItemProps>
-= ({ document }) => (
+= ({ document, author }) => (
   <List.Item actions={[
     <Link key="detail" to={`/documents/${document.id}`}>Detail</Link>,
     <Link key="edit" to={`/editor/${document.id}`}>Edit</Link>,
@@ -42,7 +46,7 @@ const DocumentItem: StatelessComponent<DocumentItemProps>
       description={
         <DocumentItemDetail
           type={document.type}
-          author={document.author}
+          author={author}
           modifiedAt={document.modifiedAt}
         />
       }

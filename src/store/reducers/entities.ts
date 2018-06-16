@@ -1,5 +1,5 @@
 import { Reducer } from 'redux'
-import { User, Document } from '@/models/types'
+import { User, Document } from '@/models'
 import { handleActions } from '@/utils/reduxHelper'
 import { EntitiesActions, UpdateDocumentEntityAction, UpdateUserEntityAction } from '../actions/entities'
 

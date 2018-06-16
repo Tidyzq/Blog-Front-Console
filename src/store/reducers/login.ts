@@ -1,7 +1,7 @@
 import { Reducer } from 'redux'
 import { LoginActions, UpdateLoginAction, ClearLoginAction } from '../actions/login'
 import { handleActions } from '@/utils/reduxHelper'
-import { User } from '@/models/types'
+import { User } from '@/models'
 
 export interface LoginStateProperty {
   user?: User,

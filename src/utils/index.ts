@@ -121,13 +121,13 @@ const dimensions = [{
 }]
 
 export const watchMedia = (() => {
-  const listeners: ((media: MediaType) => any)[] = []
+  const listeners: Set<(media: MediaType) => any> = new Set()
   let media: MediaType = MediaType.xs
   const addListener = (listener: (media: MediaType) => any) => {
-    uniquePush(listeners, listener)
+    listeners.add(listener)
   }
   const removeListener = (listener: (media: MediaType) => any) => {
-    erase(listeners, listener)
+    listeners.delete(listener)
   }
   return createLazyFunction(
     () => ({ media, addListener, removeListener }),

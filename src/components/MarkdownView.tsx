@@ -7,13 +7,23 @@ export interface MarkdownViewProps {
   value: string
 }
 
+const renderMarkdownIntoContent = (() => {
+  let prevMarkdown: string
+  return (content: HTMLElement | null, markdown: string) => {
+    if (content && (!content.innerHTML || prevMarkdown !== markdown)) {
+      prevMarkdown = markdown
+      content.innerHTML = Markdown.render(Markdown.parse(markdown))
+    }
+  }
+})()
+
 const MarkdownView: StatelessComponent<MarkdownViewProps> = ({ value }) => (
   <div
     className={styles.markdown_view}
-    dangerouslySetInnerHTML={{ __html: Markdown.render(Markdown.parse(value)) as string }}
+    ref={content => renderMarkdownIntoContent(content, value)}
   />
 )
 
 export default withDefaultProps({
   value: '',
-}, MarkdownView)
+})(MarkdownView)

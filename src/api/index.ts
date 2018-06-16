@@ -1,7 +1,6 @@
 import request from './request'
-import EventEmitter from 'events'
 import { throttlePromise } from '@/utils'
-import { User, Document, Post, Tag, Page, Setting } from '@/models/types'
+import { User, Document, Post, Tag, Page, Setting } from '@/models'
 import { forEach } from 'lodash'
 
 // add attribute to axios response
@@ -11,30 +10,6 @@ declare module 'axios' {
     totalCount?: number
   }
 }
-
-let authInterceptor: number | null = null
-
-export const AuthorizationEvent = new EventEmitter()
-
-export function bindAuthorization (getter?: () => string | undefined) {
-  if (authInterceptor !== null) {
-    request.interceptors.request.eject(authInterceptor)
-  }
-  if (getter === undefined) return
-  authInterceptor = request.interceptors.request.use(config => {
-    if (typeof config.headers.Authorization === 'undefined') {
-      config.headers.Authorization = `JWT ${getter()}`
-    }
-    return config
-  })
-}
-
-request.interceptors.response.use(undefined, error => {
-  if (error.response.status === 401) {
-    AuthorizationEvent.emit('failed')
-  }
-  return Promise.reject(error)
-})
 
 // solve total count
 request.interceptors.response.use(response => {
@@ -64,31 +39,36 @@ export function solveQuery (query?: IQuery): { [key: string]: string } {
   return result
 }
 
+const getHeaders = (accessToken: string) => ({ Authorization: `JWT ${accessToken}` })
+
 export const auth = {
   login: (body: { email: string, password: string }) => request.post<{ user: User, accessToken: string }>('/api/auth/login', body),
-  checkLogin: throttlePromise(() => request.get<void>('/api/auth/check-login')),
+  checkLogin: throttlePromise((accessToken: string) => request.get<void>('/api/auth/check-login', { headers: getHeaders(accessToken) })),
 }
 
 export const user = {
-  getAll: throttlePromise((query?: IQuery) => request.get<User[]>('/api/users', { params: solveQuery(query) })),
+  getAll: throttlePromise((accessToken: string, query?: IQuery) => request.get<User[]>('/api/users', { params: solveQuery(query), headers: getHeaders(accessToken) })),
+  create: (accessToken: string, body: User) => request.post<User>('/api/users', body, { headers: getHeaders(accessToken) }),
   getById: throttlePromise((id: number) => request.get<User>(`/api/users/${id}`)),
-  changePassword: (id: number, body: { newPassword: string, oldPassword: string }) => request.put<User>(`/api/users/${id}/password`, body),
+  update: (accessToken: string, id: number, body: User) => request.put<User>(`/api/documents/${id}`, body, { headers: getHeaders(accessToken) }),
+  delete: (accessToken: string, id: number) => request.delete(`/api/documents/${id}`, { headers: getHeaders(accessToken) }),
+  changePassword: (accessToken: string, id: number, body: { newPassword: string, oldPassword: string }) => request.put<User>(`/api/users/${id}/password`, body, { headers: getHeaders(accessToken) }),
   Post: {
     getAll: throttlePromise((userId: number, query?: IQuery) => request.get<Post[]>(`/api/users/${userId}/posts`, { params: solveQuery(query) })),
   },
 }
 
 export const document = {
-  getAll: throttlePromise((query?: IQuery) => request.get<Document[]>('/api/documents', { params: solveQuery(query) })),
-  create: (body: Document) => request.post<Document>('/api/documents', body),
-  getById: throttlePromise((id: number) => request.get<Document>(`/api/documents/${id}`)),
-  update: (id: number, body: Document) => request.put<Document>(`/api/documents/${id}`, body),
-  delete: (id: number) => request.delete(`/api/documents/${id}`),
+  getAll: throttlePromise((accessToken: string, query?: IQuery) => request.get<Document[]>('/api/documents', { params: solveQuery(query), headers: getHeaders(accessToken) })),
+  create: (accessToken: string, body: Document) => request.post<Document>('/api/documents', body, { headers: getHeaders(accessToken) }),
+  getById: throttlePromise((accessToken: string, id: number) => request.get<Document>(`/api/documents/${id}`, { headers: getHeaders(accessToken) })),
+  update: (accessToken: string, id: number, body: Document) => request.put<Document>(`/api/documents/${id}`, body, { headers: getHeaders(accessToken) }),
+  delete: (accessToken: string, id: number) => request.delete(`/api/documents/${id}`, { headers: getHeaders(accessToken) }),
   Tag: {
-    getAll: throttlePromise((documentId: number, query?: IQuery) => request.get<Tag[]>(`/api/documents/${documentId}/tags`, { params: solveQuery(query) })),
-    link: (documentId: number, body: number[]) => request.post<number[]>(`/api/documents/${documentId}/tags`, body),
-    update: (documentId: number, body: number[]) => request.put(`/api/documents/${documentId}/tags`, body),
-    delete: (documentId: number, tagId: number) => request.delete(`/api/documents/${documentId}/tags/${tagId}`),
+    getAll: throttlePromise((accessToken: string, documentId: number, query?: IQuery) => request.get<Tag[]>(`/api/documents/${documentId}/tags`, { params: solveQuery(query), headers: getHeaders(accessToken) })),
+    link: (accessToken: string, documentId: number, body: number[]) => request.post<number[]>(`/api/documents/${documentId}/tags`, body, { headers: getHeaders(accessToken) }),
+    update: (accessToken: string, documentId: number, body: number[]) => request.put(`/api/documents/${documentId}/tags`, body, { headers: getHeaders(accessToken) }),
+    delete: (accessToken: string, documentId: number, tagId: number) => request.delete(`/api/documents/${documentId}/tags/${tagId}`, { headers: getHeaders(accessToken) }),
   },
 }
 

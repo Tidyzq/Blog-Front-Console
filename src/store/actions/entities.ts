@@ -1,5 +1,5 @@
 import { Action } from 'redux'
-import { Document, User } from '@/models/types'
+import { Document, User } from '@/models'
 
 export enum EntitiesActions {
   UpdateDocumentEntity = 'UpdateDocumentEntity',

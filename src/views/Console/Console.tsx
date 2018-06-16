@@ -1,12 +1,14 @@
-import React, { PureComponent } from 'react'
+import React, { StatelessComponent } from 'react'
 import { Layout } from 'antd'
-import { Bind } from 'lodash-decorators'
-import { BrowserRouter, Route, Switch } from 'react-router-dom'
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 
-import { MediaType, watchMedia } from '@/utils'
+import { MediaType } from '@/utils'
+import ErrorBoundary from '@/components/ErrorBoundary'
+import AuthorizationBoundary from '@/components/AuthorizationBoundary'
+import withMedia from '@/components/withMedia'
 import Documents from '@/views/Documents'
+import Users from '@/views/Users'
 import Editor from '@/views/Editor'
-import Authorization from '@/views/Authorization'
 import MainContent from '@/views/MainContent'
 import Sidebar from '@/views/Sidebar'
 import Header from '@/views/Header'
@@ -15,38 +17,28 @@ import styles from './Console.scss'
 
 const { Content } = Layout
 
-export interface ConsoleProps { }
-
-export interface ConsoleState {
-  collapsed: boolean,
+export interface ConsoleProps {
   media: MediaType,
 }
 
-class Console extends PureComponent<ConsoleProps, ConsoleState> {
+const mediaShouldCollapse = (media: MediaType) => media <= MediaType.md
 
-  public mediaInfo = watchMedia()
+const mediaShouldShowSplitView = (media: MediaType) => media >= MediaType.lg
 
-  public state: ConsoleState = {
-    collapsed: this.mediaShouldCollapse(this.mediaInfo.media),
-    media: this.mediaInfo.media,
-  }
-
-  public componentWillMount () {
-    this.mediaInfo.addListener(this.updateMedia)
-  }
-
-  public componentWillUnmount () {
-    this.mediaInfo.removeListener(this.updateMedia)
-  }
-
-  public render () {
-    const { collapsed, media } = this.state
-    return (
+const Console: StatelessComponent<ConsoleProps> = ({ media }) => {
+  const collapsed = mediaShouldCollapse(media)
+  const splitView = mediaShouldShowSplitView(media)
+  return (
+    <ErrorBoundary>
       <BrowserRouter basename="/console">
         <Switch>
           <Route exact path="/login" component={Login} />
           <Route render={() =>
-            <Authorization>
+            <AuthorizationBoundary
+              unauthorized={() =>
+                <Redirect to="/login" />
+              }
+            >
               <Layout
                 className={styles.main_layout}
               >
@@ -62,15 +54,13 @@ class Console extends PureComponent<ConsoleProps, ConsoleState> {
                       </MainContent>
                     } />
                     <Route path="/users" render={() =>
-                      <MainContent>
-                        <p>2</p>
-                      </MainContent>
+                      <Users splitView={splitView}/>
                     }/>
                     <Route path="/documents" render={() =>
-                      <Documents splitView={!this.mediaShouldCollapse(media)}/>
+                      <Documents splitView={splitView}/>
                     } />
-                    <Route path="/editor/:id" render={() =>
-                      <Editor />
+                    <Route path="/editor/:id?" render={() =>
+                      <Editor splitView={splitView}/>
                     } />
                     <Route path="/tags" render={() =>
                       <MainContent>
@@ -85,33 +75,14 @@ class Console extends PureComponent<ConsoleProps, ConsoleState> {
                   </Content>
                 </Layout>
               </Layout >
-            </Authorization>
+            </AuthorizationBoundary>
           } />
         </Switch>
       </BrowserRouter>
-    )
-  }
-
-  private mediaShouldCollapse (media: MediaType) {
-    return media <= MediaType.sm
-  }
-
-  @Bind()
-  private updateMedia (media: MediaType) {
-    const { media: oldMedia } = this.state
-    this.setState({
-      media,
-    })
-    if (this.mediaShouldCollapse(media) && !this.mediaShouldCollapse(oldMedia)) {
-      this.setState({
-        collapsed: true,
-      })
-    } else if (this.mediaShouldCollapse(oldMedia) && !this.mediaShouldCollapse(media)) {
-      this.setState({
-        collapsed: false,
-      })
-    }
-  }
+    </ErrorBoundary>
+  )
 }
 
-export default Console
+export default withMedia(
+  Console,
+)

@@ -8,5 +8,5 @@ export const handleActions = <S>(reducerMap: { [type: string]: Reducer<S, any> }
   return state
 }
 
-export const createThunkAction = <A extends Action, S, E, R>(thunkAction: ThunkAction<R, S, E, A>): R => thunkAction as any as R
+export const createThunkAction = <R, S, E, A extends Action>(thunkAction: ThunkAction<R, S, E, A>): ThunkAction<R, S, E, A> & R => thunkAction as ThunkAction<R, S, E, A> & R
 

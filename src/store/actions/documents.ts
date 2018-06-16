@@ -1,56 +1,61 @@
 import { document as documentAPI } from '@/api'
-import { createThunkAction } from '@/utils/reduxHelper'
-import { Document } from '@/models/types'
+import { Document } from '@/models'
+import { fetchUser } from './users'
+import { createThunkActionWithAccessToken } from './login'
 import { updateDocumentEntity } from './entities'
 
-export const fetchDocuments = () => createThunkAction(async dispatch => {
+export const fetchDocuments = () => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
   try {
-    const { data: documents } = await documentAPI.getAll()
-    for (const document of documents) {
-      dispatch(updateDocumentEntity(document.id, document))
-    }
+    const { data: documents } = await documentAPI.getAll(accessToken)
+
+    documents.forEach(document => dispatch(updateDocumentEntity(document.id, document)))
+    const authors = new Set(documents.map(({ author }) => author))
+    authors.forEach(author => dispatch(fetchUser(author)))
+
     const idList = documents.map(({ id }) => id)
-    // dispatch(updateDocumentList(idList))
     return idList
   } catch (e) {
-    return []
+    throw e
   }
 })
 
-export const fetchDocument = (id: number) => createThunkAction(async dispatch => {
+export const fetchDocument = (id: number) => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
   try {
-    const { data: document } = await documentAPI.getById(id)
+    const { data: document } = await documentAPI.getById(accessToken, id)
     dispatch(updateDocumentEntity(id, document))
+    dispatch(fetchUser(document.author))
     return document
   } catch (e) {
-    // do nothing
+    throw e
   }
-  return undefined
 })
 
-export const createDocument = (document: Document) => createThunkAction(async dispatch => {
+export const createDocument = (document: Document) => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
   try {
-    const { data: returnedDocument } = await documentAPI.create(document)
+    const { data: returnedDocument } = await documentAPI.create(accessToken, document)
     dispatch(updateDocumentEntity(returnedDocument.id, returnedDocument))
+    dispatch(fetchUser(returnedDocument.author))
+    return returnedDocument
   } catch (e) {
-    // do nothing
+    throw e
   }
 })
 
-export const updateDocument = (document: Document) => createThunkAction(async dispatch => {
+export const updateDocument = (document: Document) => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
   try {
-    const { data: returnedDocument } = await documentAPI.update(document.id, document)
+    const { data: returnedDocument } = await documentAPI.update(accessToken, document.id, document)
     dispatch(updateDocumentEntity(document.id, returnedDocument))
+    dispatch(fetchUser(returnedDocument.author))
   } catch (e) {
-    // do nothing
+    throw e
   }
 })
 
-export const deleteDocument = (id: number) => createThunkAction(async dispatch => {
+export const deleteDocument = (id: number) => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
   try {
-    await documentAPI.delete(id)
+    await documentAPI.delete(accessToken, id)
     dispatch(updateDocumentEntity(id, undefined))
   } catch (e) {
-    // do nothing
+    throw e
   }
 })

@@ -90,4 +90,4 @@ class MarkdownEditor extends PureComponent<MarkdownEditorProps, MarkdownEditorSt
 
 export default withDefaultProps({
   value: '',
-}, MarkdownEditor)
+})(MarkdownEditor)

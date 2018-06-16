@@ -1,7 +1,14 @@
-.editor_container {
+.editor_container, .editor_container_split {
   display: block;
-  width: 50%;
   float: left;
   flex: 0 0 auto;
   overflow: auto;
+}
+
+.editor_container {
+  width: 100%;
+}
+
+.editor_container_split {
+  width: 50%;
 }

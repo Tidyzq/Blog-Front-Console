@@ -3,9 +3,12 @@ import { connect } from 'react-redux'
 import { Redirect } from 'react-router'
 import { Button, Input, Row, Col, Form } from 'antd'
 import { FormComponentProps } from 'antd/lib/form'
+
 import Icon from '@/components/Icon'
 import { State } from '@/store'
 import { login } from '@/store/actions/login'
+
+import { accessTokenSelector } from './selector'
 import styles from './Login.scss'
 
 export interface LoginProps extends FormComponentProps {
@@ -51,7 +54,7 @@ const Login = (({ accessToken, login, form: { getFieldDecorator, validateFields 
 
 export default Form.create()(
   connect((state: State) => ({
-    accessToken: state.login.accessToken,
+    accessToken: accessTokenSelector(state),
   }), {
     login,
   })(Login),

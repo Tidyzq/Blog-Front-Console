@@ -267,6 +267,7 @@ module.exports = {
       watch: isDevelopment ? paths.appSrc : undefined,
       tsconfig: paths.appTsConfig,
       tslint: paths.appTsLint,
+      workers: ForkTsCheckerWebpackPlugin.TWO_CPUS_FREE,
     }),
     // monaco-editor
     new webpack.IgnorePlugin(/^((fs)|(path)|(os)|(crypto)|(source-map-support))$/, /vs\/language\/typescript\/lib/),

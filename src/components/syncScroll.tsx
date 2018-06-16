@@ -1,82 +1,83 @@
-import React, { PureComponent, ReactNode } from 'react'
-import EventEmitter from 'events'
+import React, { PureComponent } from 'react'
 import { Bind } from 'lodash-decorators'
 
-import { ThrottleByRAF } from '@/utils/decorators'
-
-const scrollEventBus = new EventEmitter()
-const ScrollEvent = Symbol()
+import { ThrottleWithRAF } from '@/utils/decorators'
 
 export interface SyncScrollOptions {
   containerClassName?: string
 }
 
-export class SyncScrollContainer extends PureComponent<SyncScrollOptions> {
+export const createSyncScroll = () => {
+  type SyncScrollEventHandler = (sender: any, scroll: number) => void
 
-  private container: HTMLDivElement | null = null
-  private isSettingScroll: boolean = false
+  const listeners: Set<SyncScrollEventHandler> = new Set()
+  const emit = (sender: any, scroll: number): void => listeners.forEach(listener => listener(sender, scroll))
+  const addListener = (listener: SyncScrollEventHandler): void => { listeners.add(listener) }
+  const removeListener = (listener: SyncScrollEventHandler): void => { listeners.delete(listener) }
 
-  public componentDidMount () {
-    scrollEventBus.addListener(ScrollEvent, this.onScrollEvent)
-  }
+  class SyncScrollContainer extends PureComponent<SyncScrollOptions, {}> {
 
-  public componentWillUnmount () {
-    scrollEventBus.removeListener(ScrollEvent, this.onScrollEvent)
-  }
+    private container: HTMLDivElement | null = null
+    private isSettingScroll: boolean = false
 
-  public render () {
-    const { containerClassName, children } = this.props
-    return (
-      <div
-        className={containerClassName}
-        ref={container => this.container = container}
-        onScroll={this.onScroll}
-      >
-        <div>
-          {children}
-        </div>
-      </div>
-    )
-  }
-
-  private getScroll () {
-    const { container } = this
-    if (!container) return 0
-    const scroll = container.scrollTop / (container.scrollHeight - container.clientHeight)
-    return scroll
-  }
-
-  private setScroll (scroll: number) {
-    const { container } = this
-    if (!container) return
-    this.isSettingScroll = true
-    container.scrollTop = scroll * (container.scrollHeight - container.clientHeight)
-  }
-
-  @ThrottleByRAF()
-  private updateScroll (scroll: number) {
-    scrollEventBus.emit(ScrollEvent, this, scroll)
-  }
-
-  @Bind()
-  private onScrollEvent (sender: SyncScrollContainer, scroll: number) {
-    if (sender !== this) this.setScroll(scroll)
-  }
-
-  @Bind()
-  private onScroll () {
-    if (this.isSettingScroll) {
-      this.isSettingScroll = false
-      return
+    public componentDidMount () {
+      addListener(this.onScrollEvent)
     }
-    this.updateScroll(this.getScroll())
+
+    public componentWillUnmount () {
+      removeListener(this.onScrollEvent)
+    }
+
+    public render () {
+      const { containerClassName, children } = this.props
+      return (
+        <div
+          className={containerClassName}
+          ref={container => this.container = container}
+          onScroll={this.onScroll}
+        >
+          <div>
+            {children}
+          </div>
+        </div>
+      )
+    }
+
+    private getScroll () {
+      const { container } = this
+      if (!container) return 0
+      const scroll = container.scrollTop / (container.scrollHeight - container.clientHeight)
+      return scroll
+    }
+
+    private setScroll (scroll: number) {
+      const { container } = this
+      if (!container) return
+      this.isSettingScroll = true
+      container.scrollTop = scroll * (container.scrollHeight - container.clientHeight)
+    }
+
+    @ThrottleWithRAF()
+    private updateScroll (scroll: number) {
+      emit(this, scroll)
+    }
+
+    @Bind()
+    private onScrollEvent (sender: SyncScrollContainer, scroll: number) {
+      if (sender !== this) this.setScroll(scroll)
+    }
+
+    @Bind()
+    private onScroll () {
+      if (this.isSettingScroll) {
+        this.isSettingScroll = false
+        return
+      }
+      this.updateScroll(this.getScroll())
+    }
   }
+
+  return SyncScrollContainer
 }
 
-const syncScroll = (options: SyncScrollOptions) => (node: ReactNode): ReactNode => (
-  <SyncScrollContainer {...options}>
-    {node}
-  </SyncScrollContainer>
-)
-
-export default syncScroll
+export default createSyncScroll
