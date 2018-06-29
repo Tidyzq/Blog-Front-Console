@@ -8,20 +8,19 @@ import { fetchUsers } from '@/store/actions/users'
 
 import UserListItem from './UserListItem'
 import { usersSelector } from './selector'
-// import DocumentListItem from './Item'
 
-export interface DocumentListProps {
+export interface UserListProps {
   users: { [id: number]: User | undefined },
   fetchUsers: typeof fetchUsers,
 }
 
-export interface DocumentListState {
+export interface UserListState {
   userIdList: number[],
 }
 
-class DocumentList extends PureComponent<DocumentListProps, DocumentListState> {
+class UserList extends PureComponent<UserListProps, UserListState> {
 
-  public state: DocumentListState = {
+  public state: UserListState = {
     userIdList: [],
   }
 
@@ -52,4 +51,4 @@ export default connect((state: State) => ({
   users: usersSelector(state),
 }), {
   fetchUsers,
-})(DocumentList)
+})(UserList)

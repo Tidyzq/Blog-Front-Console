@@ -1,92 +1,170 @@
-import React, { StatelessComponent } from 'react'
+import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 import { withRouter, RouteComponentProps } from 'react-router'
-import { Modal, Form, Input, Select, Button } from 'antd'
+import { Modal, Form, Input, Select, Button, Divider, message } from 'antd'
 import { FormComponentProps } from 'antd/lib/form'
+import { mapValues } from 'lodash'
 
-import { Document } from '@/models'
+import { Document, Tag } from '@/models'
 import withDefaultProps from '@/components/withDefaultProps'
 import { deleteDocument } from '@/store/actions/documents'
+import { fetchTags } from '@/store/actions/tags'
+import { State } from '@/store'
+
+import { tagsSelector } from './selector'
 
 export interface DocumentDetailModalProps extends FormComponentProps, RouteComponentProps<{}> {
   document: Document | undefined
+  tags: number[]
+  tagsMap: { [id: number]: Tag | undefined }
   visible: boolean
   onClose: () => void
-  onSubmit: (document: Document) => void
-  disabled: boolean
+  onSubmit: (document: Document, tags: number[]) => void
   deleteDocument: typeof deleteDocument
+  fetchTags: typeof fetchTags
 }
 
-const DocumentDetail: StatelessComponent<DocumentDetailModalProps> =
-({
-  document,
-  visible,
-  onClose,
-  onSubmit,
-  disabled,
-  deleteDocument,
-  form: {
-    getFieldDecorator,
-    getFieldsValue,
-  },
-  history,
-}) => document === undefined ? null : (
-  <Modal
-    title={document.title}
-    visible={visible}
-    onCancel={onClose}
-    onOk={() => onSubmit({ ...document, ...getFieldsValue() as Document })}
-  >
-    <Form layout="vertical">
-      <Form.Item label="Url">
-        {getFieldDecorator('url')(
-          <Input disabled={disabled}/>,
-        )}
-      </Form.Item>
-      <Form.Item label="Type">
-        {getFieldDecorator('type')(
-          <Select disabled={disabled}>
-            <Select.Option value="draft">Draft</Select.Option>
-            <Select.Option value="post">Post</Select.Option>
-            <Select.Option value="page">Page</Select.Option>
-          </Select>,
-        )}
-      </Form.Item>
-      <Form.Item>
-        <Button
-          type="danger"
-          style={{ width: '100%' }}
-          onClick={() => {
-            Modal.confirm({
-              content: `Are you sure to delete document "${document.title}"?`,
-              onOk: () => {
-                deleteDocument(document.id)
-                history.push('/documents')
-              },
-            })
-          }}
-        >
-          Delete
-        </Button>
-      </Form.Item>
-    </Form>
-  </Modal>
-)
+export interface DocumentDetailModalState {
+  tagIds: number[]
+}
+
+class DocumentDetail extends PureComponent<DocumentDetailModalProps, DocumentDetailModalState> {
+
+  public state: DocumentDetailModalState = {
+    tagIds: [],
+  }
+
+  private formItemLayout = {
+    labelCol: {
+      sm: { span: 4 },
+      xs: { span: 24 },
+    },
+    wrapperCol: {
+      sm: { span: 16 },
+      xs: { span: 24 },
+    },
+  }
+
+  private formButtonLayout = {
+    wrapperCol: {
+      sm: { span: 16, offset: 4 },
+      xs: { span: 24 },
+    },
+  }
+
+  public componentDidUpdate (prevProps: DocumentDetailModalProps) {
+    if (this.props.visible && !prevProps.visible) {
+      this.fetchTags()
+    }
+  }
+
+  public render () {
+    const {
+      document,
+      tagsMap,
+      visible,
+      onClose,
+      onSubmit,
+      deleteDocument,
+      form: {
+        getFieldDecorator,
+        getFieldsValue,
+      },
+      history,
+    } = this.props
+    const { tagIds } = this.state
+    return document === undefined ? null : (
+      <Modal
+        title={document.title}
+        visible={visible}
+        onCancel={onClose}
+        onOk={() => {
+          const { tags: newTags, ...newDocument } = getFieldsValue() as Document & { tags: number[] }
+          onSubmit({ ...document, ...newDocument }, newTags)
+        }}
+      >
+        <Form layout="horizontal">
+          <Form.Item label="Tags" {...this.formItemLayout}>
+            {getFieldDecorator('tags')(
+              <Select mode="multiple">
+                {tagIds.map(tagId => {
+                  const tag = tagsMap[tagId]
+                  if (!tag) return null
+                  return (
+                    <Select.Option key={tag.id} value={tag.id}>{tag.name}</Select.Option>
+                  )
+                })}
+              </Select>,
+            )}
+          </Form.Item>
+          <Form.Item label="Url" {...this.formItemLayout}>
+            {getFieldDecorator('url')(
+              <Input/>,
+            )}
+          </Form.Item>
+          <Form.Item label="Type" {...this.formItemLayout}>
+            {getFieldDecorator('type')(
+              <Select>
+                <Select.Option value="draft">Draft</Select.Option>
+                <Select.Option value="post">Post</Select.Option>
+                <Select.Option value="page">Page</Select.Option>
+              </Select>,
+            )}
+          </Form.Item>
+          <Divider />
+          <Form.Item {...this.formButtonLayout}>
+            <Button
+              type="danger"
+              style={{ width: '100%' }}
+              onClick={() => {
+                Modal.confirm({
+                  content: `Are you sure to delete document "${document.title}"?`,
+                  onOk: async () => {
+                    try {
+                      await deleteDocument(document.id)
+                      message.success(`Document "${document.title}" has been deleted`)
+                      history.push('/documents')
+                    } catch (e) {
+                      message.error(e.message)
+                      console.error(e)
+                    }
+                  },
+                })
+              }}
+            >
+              Delete
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+    )
+  }
+
+  private async fetchTags () {
+    const { fetchTags } = this.props
+    const tagIds = await fetchTags()
+    this.setState({ tagIds })
+  }
+}
 
 export default withDefaultProps({
-  disabled: false,
-  onSubmit: (_: Document) => {},
+  onSubmit: (_: Document, __: number[]) => {},
 })(
-  connect(null, {
-    deleteDocument,
-  })(
-    withRouter(
-      Form.create({
-        mapPropsToFields: ({ document }: DocumentDetailModalProps) => ({
-          url: Form.createFormField({ value: document ? document.url : '' }),
-          type: Form.createFormField({ value: document ? document.type : '' }),
-        }),
-      })(DocumentDetail),
+  withRouter(
+    Form.create({
+      mapPropsToFields: ({ document, tags }: DocumentDetailModalProps) => ({
+        ...mapValues(document, value => Form.createFormField({ value })),
+        tags: Form.createFormField({ value: tags }),
+      }),
+    })(
+      connect((state: State) => ({
+        tagsMap: tagsSelector(state),
+      }), {
+        deleteDocument,
+        fetchTags,
+      })(
+        DocumentDetail,
+      ),
     ),
   ),
 )

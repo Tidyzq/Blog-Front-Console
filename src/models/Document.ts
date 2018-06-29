@@ -16,6 +16,6 @@ export const createNewDocument = (): Document => ({
   type: 'draft',
   markdown: '',
   modifiedAt: 0,
-  createAt: 0,
+  createdAt: 0,
   author: 0,
-}) as any
+})

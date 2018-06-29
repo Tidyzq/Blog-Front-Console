@@ -17,4 +17,21 @@ export interface TagDocument {
   documentId: number
 }
 
-export type Setting = any
+export interface Setting {
+  title: string
+  description: string
+  cover: string
+  postPerPage: number
+  logo: string
+  navigation: {
+    name: string
+    path: string
+  }[]
+}
+
+export interface Image {
+  name: string
+  size: string
+  lastModified: Date
+  url: string
+}

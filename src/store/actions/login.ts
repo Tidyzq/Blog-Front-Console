@@ -1,7 +1,9 @@
 import { ActionCreator, Action } from 'redux'
 import { ThunkDispatch } from 'redux-thunk'
+
 import { auth } from '@/api'
-import { createThunkAction } from '@/utils/reduxHelper'
+import { createThunkAction } from '@/utils/redux'
+import { getErrorCode } from '@/utils/api'
 import { User } from '@/models'
 import { State } from '@/store'
 
@@ -47,13 +49,14 @@ export const checkLogin = () => createThunkActionWithAccessToken(async accessTok
   }
 })
 
-export const createThunkActionWithAccessToken = <R, E, A extends Action>(thunkActionWithAccessToken: (accessToken: string, dispatch: ThunkDispatch<State, E, A>, getState: () => State, extraArgument: E) => Promise<R>): Promise<R> => createThunkAction<Promise<R>, State, E, A>(async (dispatch, getState, extraArgument) => {
+export const createThunkActionWithAccessToken = <R, E, A extends Action>(thunkActionWithAccessToken: (accessToken: string, dispatch: ThunkDispatch<State, E, A>, getState: () => State, extraArgument: E) => Promise<R>) => createThunkAction<Promise<R>, State, E, A>(async (dispatch, getState, extraArgument) => {
   try {
     const { login: { accessToken }} = getState()
     if (!accessToken) throw new Error('No AccessToken')
     return await thunkActionWithAccessToken(accessToken, dispatch, getState, extraArgument)
   } catch (e) {
-    dispatch(clearLogin() as A)
+    const code = getErrorCode(e)
+    if (code === 401) dispatch(clearLogin() as A)
     throw e
   }
 })

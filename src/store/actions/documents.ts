@@ -1,61 +1,62 @@
 import { document as documentAPI } from '@/api'
 import { Document } from '@/models'
+import { createThunkAction } from '@/utils/redux'
+
 import { fetchUser } from './users'
 import { createThunkActionWithAccessToken } from './login'
-import { updateDocumentEntity } from './entities'
+import { updateDocumentEntity, updateTagEntity } from './entities'
+import { updateDocumentToTagsRelation } from './relations'
+
+export const fetchDocumentAuthor = (id: number) => createThunkAction(dispatch => dispatch(fetchUser(id)))
+
+export const fetchDocumentTags = (id: number) => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
+  const { data: tags } = await documentAPI.Tag.getAll(accessToken, id)
+  tags.forEach(tag => dispatch(updateTagEntity(tag.id, tag)))
+  const tagIds = tags.map(tag => tag.id)
+  dispatch(updateDocumentToTagsRelation(id, tagIds))
+  return tagIds
+})
 
 export const fetchDocuments = () => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
-  try {
-    const { data: documents } = await documentAPI.getAll(accessToken)
+  const { data: documents } = await documentAPI.getAll(accessToken)
 
-    documents.forEach(document => dispatch(updateDocumentEntity(document.id, document)))
-    const authors = new Set(documents.map(({ author }) => author))
-    authors.forEach(author => dispatch(fetchUser(author)))
+  documents.forEach(document => {
+    dispatch(updateDocumentEntity(document.id, document))
+    dispatch(fetchDocumentAuthor(document.author))
+    // dispatch(fetchDocumentTags(document.id))
+  })
 
-    const idList = documents.map(({ id }) => id)
-    return idList
-  } catch (e) {
-    throw e
-  }
+  const idList = documents.map(({ id }) => id)
+  return idList
 })
 
 export const fetchDocument = (id: number) => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
-  try {
-    const { data: document } = await documentAPI.getById(accessToken, id)
-    dispatch(updateDocumentEntity(id, document))
-    dispatch(fetchUser(document.author))
-    return document
-  } catch (e) {
-    throw e
-  }
+  const [ tags, { data: document } ] = await Promise.all([
+    dispatch(fetchDocumentTags(id)),
+    documentAPI.getById(accessToken, id),
+  ])
+  dispatch(updateDocumentEntity(document.id, document))
+  const author = await fetchDocumentAuthor(document.author)
+  return { document, author, tags }
 })
 
 export const createDocument = (document: Document) => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
-  try {
-    const { data: returnedDocument } = await documentAPI.create(accessToken, document)
-    dispatch(updateDocumentEntity(returnedDocument.id, returnedDocument))
-    dispatch(fetchUser(returnedDocument.author))
-    return returnedDocument
-  } catch (e) {
-    throw e
-  }
+  const { data: returnedDocument } = await documentAPI.create(accessToken, document)
+  dispatch(updateDocumentEntity(document.id, document))
+  return returnedDocument
 })
 
 export const updateDocument = (document: Document) => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
-  try {
-    const { data: returnedDocument } = await documentAPI.update(accessToken, document.id, document)
-    dispatch(updateDocumentEntity(document.id, returnedDocument))
-    dispatch(fetchUser(returnedDocument.author))
-  } catch (e) {
-    throw e
-  }
+  const { data: returnedDocument } = await documentAPI.update(accessToken, document.id, document)
+  dispatch(updateDocumentEntity(returnedDocument.id, returnedDocument))
+})
+
+export const updateDocumentTags = (id: number, tagIds: number[]) => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
+  dispatch(updateDocumentToTagsRelation(id, tagIds))
+  await documentAPI.Tag.update(accessToken, id, tagIds)
 })
 
 export const deleteDocument = (id: number) => createThunkActionWithAccessToken(async (accessToken, dispatch) => {
-  try {
-    await documentAPI.delete(accessToken, id)
-    dispatch(updateDocumentEntity(id, undefined))
-  } catch (e) {
-    throw e
-  }
+  await documentAPI.delete(accessToken, id)
+  dispatch(updateDocumentEntity(id, undefined))
 })

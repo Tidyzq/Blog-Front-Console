@@ -5,6 +5,7 @@ import { ThrottleWithRAF } from '@/utils/decorators'
 
 export interface SyncScrollOptions {
   containerClassName?: string
+  style?: React.CSSProperties
 }
 
 export const createSyncScroll = () => {
@@ -29,10 +30,11 @@ export const createSyncScroll = () => {
     }
 
     public render () {
-      const { containerClassName, children } = this.props
+      const { containerClassName, style, children } = this.props
       return (
         <div
           className={containerClassName}
+          style={style}
           ref={container => this.container = container}
           onScroll={this.onScroll}
         >

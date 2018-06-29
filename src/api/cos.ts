@@ -1,22 +1,24 @@
+import { xml2js, getHeaders } from '@/utils/api'
+
 import request from './request'
-import { xml2js } from '../utils/xml'
+
+const API_URL = process.env.REACT_APP_COS_API_URL || ''
 
 export const Token = {
-  get: (method: string, key: string) => request.get<{ token: string }>('/api/cos/token', { params: { method, key } }),
+  get: (accessToken: string, method: string, key: string) => request.get<{ token: string }>('/api/cos/token', { params: { method, key }, headers: getHeaders(accessToken) }),
 }
 
-async function getAuthorization (method: string, key: string) {
-  const realMethod = (method || 'get').toLowerCase()
+async function getAuthorization (accessToken: string, method: string, key: string) {
+  const realMethod = (method || '*').toLowerCase()
   const realKey = key || ''
-  const { data: { token } } = await Token.get(realMethod, realKey)
+  const { data: { token } } = await Token.get(accessToken, realMethod, realKey)
   return token
 }
 
-const apiUrl = process.env.REACT_APP_COS_API_URL || ''
-const cdnUrl = process.env.REACT_APP_COS_CDN_URL || ''
-
 export interface BucketContent {
-  ListBucketResult: CosContent[]
+  ListBucketResult: {
+    Contents: CosContent[]
+  }
 }
 
 export interface CosContent {
@@ -28,21 +30,18 @@ export interface CosContent {
 
 export default {
   Token,
-  async get () {
-    const token = await getAuthorization('get', '')
-    const { data } = await request.get(apiUrl, { headers: { Authorization: token } })
-    const { ListBucketResult: result } = await xml2js(data) as BucketContent
+  async get (accessToken: string) {
+    const token = await getAuthorization(accessToken, 'get', '')
+    const { data } = await request.get(API_URL, { headers: { Authorization: token }})
+    const { ListBucketResult: { Contents: result } } = await xml2js(data) as BucketContent
     return result
   },
-  async put (key: string | undefined, file: File, progress?: () => void) {
-    if (typeof key !== 'string') {
-      progress = (file as any)
-      file = key as any
-      key = (file || {}).name
-    }
-    const token = await getAuthorization('put', key)
+  async put (accessToken: string, file: File, options?: { key?: string, progress?: (e: ProgressEvent) => void }) {
+    const key = options && options.key ? options.key : file.name
+    const progress = options && options.progress ? options.progress : undefined
+    const token = await getAuthorization(accessToken, 'put', key)
     await request.put(
-      `${apiUrl}/${key}`,
+      `${API_URL}/${key}`,
       file,
       {
         headers: {
@@ -52,11 +51,9 @@ export default {
         onUploadProgress: progress,
       },
     )
-    return `${cdnUrl}/${key}`
   },
-  async delete (key: string) {
-    const token = await getAuthorization('delete', key)
-    await request.delete(`${apiUrl}/${key}`, { headers: { Authorization: token }})
-    return `${cdnUrl}/${key}`
+  async delete (accessToken: string, key: string) {
+    const token = await getAuthorization(accessToken, 'delete', key)
+    await request.delete(`${API_URL}/${key}`, { headers: { Authorization: token }})
   },
 }

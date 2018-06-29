@@ -2,12 +2,14 @@ import React, { StatelessComponent } from 'react'
 import { Layout } from 'antd'
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 
-import { MediaType } from '@/utils'
+import { MediaType } from '@/utils/media'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import AuthorizationBoundary from '@/components/AuthorizationBoundary'
 import withMedia from '@/components/withMedia'
 import Documents from '@/views/Documents'
 import Users from '@/views/Users'
+import Tags from '@/views/Tags'
+import Settings from '@/views/Settings'
 import Editor from '@/views/Editor'
 import MainContent from '@/views/MainContent'
 import Sidebar from '@/views/Sidebar'
@@ -63,14 +65,10 @@ const Console: StatelessComponent<ConsoleProps> = ({ media }) => {
                       <Editor splitView={splitView}/>
                     } />
                     <Route path="/tags" render={() =>
-                      <MainContent>
-                        <p>4</p>
-                      </MainContent>
+                      <Tags splitView={splitView}/>
                     } />
                     <Route path="/settings" render={() =>
-                      <MainContent>
-                        <p>5</p>
-                      </MainContent>
+                      <Settings />
                     } />
                   </Content>
                 </Layout>

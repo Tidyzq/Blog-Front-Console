@@ -1,6 +1,6 @@
 import { Reducer } from 'redux'
 import { LoginActions, UpdateLoginAction, ClearLoginAction } from '../actions/login'
-import { handleActions } from '@/utils/reduxHelper'
+import { handleActions } from '@/utils/redux'
 import { User } from '@/models'
 
 export interface LoginStateProperty {

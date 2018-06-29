@@ -1,5 +1,3 @@
-export const isProduction = process.env.NODE_ENV === 'production'
-
 export const now = ((): (() => number) => {
   const hasPerformance = typeof window !== 'undefined' && window.performance && window.performance.now
 
@@ -36,22 +34,25 @@ export function throttlePromise <T extends (...args: any[]) => Promise<any>> (fu
   }) as T
 }
 
-export function uniquePush<T> (arr: T[], item: T): boolean {
-  const index = arr.indexOf(item)
-  if (index === -1) {
-    arr.push(item)
-    return true
+export function throttleWithRAF <T extends (...args: any[]) => any> (func: T) {
+  let rAFHandler: number | null = null
+  let rAFCall: boolean = false
+  let rAFThis: any
+  let rAFArgs: any[]
+  return function (this: any, ...args: any[]) {
+    if (rAFHandler === null) {
+      func.apply(this, args)
+      rAFCall = false
+      rAFHandler = requestAnimationFrame(() => {
+        if (rAFCall) func.apply(rAFThis, rAFArgs)
+        rAFHandler = null
+      })
+    } else {
+      rAFThis = this
+      rAFArgs = args
+      rAFCall = true
+    }
   }
-  return false
-}
-
-export function erase<T> (arr: T[], item: T): boolean {
-  const index = arr.indexOf(item)
-  if (index !== -1) {
-    arr.splice(index, 1)
-    return true
-  }
-  return false
 }
 
 export function JsonStringify (obj: any): string {
@@ -74,7 +75,7 @@ export function JsonParse (obj: string): any {
   return result
 }
 
-export function createLazyFunction<T extends (...args: any[]) => any> (main: T, firstCall: () => void): T {
+export function createLazyFunction <T extends (...args: any[]) => any> (main: T, firstCall: () => void): T {
   let actualFunc = ((...args: any[]) => {
     firstCall()
     actualFunc = main
@@ -83,71 +84,11 @@ export function createLazyFunction<T extends (...args: any[]) => any> (main: T, 
   return ((...args: any[]) => actualFunc(...args)) as T
 }
 
-export enum MediaType {
-  xs,
-  sm,
-  md,
-  lg,
-  xl,
-  xxl,
-}
-
-interface Dimension {
-  maxWidth: string,
-  below: MediaType,
-  above: MediaType,
-}
-
-const dimensions = [{
-  maxWidth: '576px',
-  below: MediaType.xs,
-  above: MediaType.sm,
-}, {
-  maxWidth: '768px',
-  below: MediaType.sm,
-  above: MediaType.md,
-}, {
-  maxWidth: '992px',
-  below: MediaType.md,
-  above: MediaType.lg,
-}, {
-  maxWidth: '1200px',
-  below: MediaType.lg,
-  above: MediaType.xl,
-}, {
-  maxWidth: '1600px',
-  below: MediaType.xl,
-  above: MediaType.xxl,
-}]
-
-export const watchMedia = (() => {
-  const listeners: Set<(media: MediaType) => any> = new Set()
-  let media: MediaType = MediaType.xs
-  const addListener = (listener: (media: MediaType) => any) => {
-    listeners.add(listener)
+export function prefixReduce<I, R> (arr: I[], reducer: (accumulator: R, currentValue: I, currentIndex: number) => R, initialValue: R): R[] {
+  let value: R = initialValue
+  const result: R[] = []
+  for (let i = 0; i < arr.length; ++i) {
+    result[i] = value = reducer(value, arr[i], i)
   }
-  const removeListener = (listener: (media: MediaType) => any) => {
-    listeners.delete(listener)
-  }
-  return createLazyFunction(
-    () => ({ media, addListener, removeListener }),
-    () => {
-      const setMedia = (m: MediaType) => {
-        if (media === m) return
-        media = m
-        listeners.forEach(listener => listener(media))
-      }
-      const getResponsiveHandler = (dimension: Dimension) => (mql: MediaQueryList) =>
-        setMedia(mql.matches ?
-          Math.min(media, dimension.below) :
-          Math.max(media, dimension.above) ,
-        )
-      dimensions.forEach(dimension => {
-        const mql = window.matchMedia(`(max-width: ${dimension.maxWidth})`)
-        const responsiveHandler = getResponsiveHandler(dimension)
-        mql.addListener(responsiveHandler)
-        responsiveHandler(mql)
-      })
-    },
-  )
-})()
+  return result
+}

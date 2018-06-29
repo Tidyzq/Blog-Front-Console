@@ -1,5 +1,6 @@
 import React, { StatelessComponent } from 'react'
 import { LoadingComponentProps } from 'react-loadable'
+import { Spin } from 'antd'
 
 export interface LoadingProps extends LoadingComponentProps { }
 
@@ -9,7 +10,7 @@ const Loading: StatelessComponent<LoadingProps> = ({ error, retry, timedOut, pas
   } else if (timedOut) {
     return <div>Taking a long time... <button onClick={retry}>Retry</button></div>
   } else if (pastDelay) {
-    return <div>Loading...</div>
+    return <Spin />
   } else {
     return null
   }

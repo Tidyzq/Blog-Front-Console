@@ -6,13 +6,15 @@ import { message } from 'antd'
 
 import { Document } from '@/models'
 import { Portal as HeaderPortal, Input, Button } from '@/views/Header'
-import createSyncScroll from '@/components/syncScroll'
-import MarkdownEditor from '@/components/MarkdownEditor'
-import MarkdownView from '@/components/MarkdownView'
+import MarkdownEditor, { Editor as EditorHandler } from '@/views/MarkdownEditor'
+import MarkdownView from '@/views/MarkdownView'
 import DocumentDetailModal from '@/views/Documents/DocumentDetailModal'
+import createSyncScroll from '@/components/syncScroll'
 import { State } from '@/store'
 import { createNewDocument } from '@/models/Document'
-import { fetchDocument, updateDocument, createDocument } from '@/store/actions/documents'
+import { fetchDocument, updateDocument, updateDocumentTags, createDocument } from '@/store/actions/documents'
+
+import Toolbar from './Toolbar'
 import styles from './Editor.scss'
 
 export interface EditorProps extends RouteComponentProps<{ id: string | undefined }> {
@@ -21,12 +23,15 @@ export interface EditorProps extends RouteComponentProps<{ id: string | undefine
   splitView: boolean
   fetchDocument: typeof fetchDocument
   updateDocument: typeof updateDocument
+  updateDocumentTags: typeof updateDocumentTags
   createDocument: typeof createDocument
 }
 
 export interface EditorState {
   document: Document | undefined
+  tags: number[]
   detailModalVisible: boolean
+  editor: EditorHandler | null
 }
 
 const SyncScrollContainer = createSyncScroll()
@@ -35,12 +40,14 @@ class Editor extends PureComponent<EditorProps, EditorState> {
 
   public state: EditorState = {
     document: undefined,
+    tags: [],
     detailModalVisible: false,
+    editor: null,
   }
 
   public render () {
     const { splitView } = this.props
-    const { document } = this.state
+    const { editor, document, tags } = this.state
     const markdown = document ? document.markdown : undefined
     return (
       <Fragment>
@@ -51,17 +58,22 @@ class Editor extends PureComponent<EditorProps, EditorState> {
         </HeaderPortal>
         <DocumentDetailModal
           document={document}
+          tags={tags}
           visible={this.state.detailModalVisible}
-          onSubmit={document => this.setState({ document })}
+          onSubmit={(document, tags) => this.setState({ document, tags, detailModalVisible: false })}
           onClose={() => this.setState({ detailModalVisible: false })}
         />
-        <SyncScrollContainer containerClassName={splitView ? styles.editor_container_split : styles.editor_container}>
-          <MarkdownEditor
-            value={markdown}
-            onChange={this.onEditorChange}
-            onSave={this.onEditorSave}
-          />
-        </SyncScrollContainer>
+        <div className={splitView ? styles.editor_container_split : styles.editor_container} style={{ display: 'flex', flexDirection: 'column' }}>
+          <Toolbar editor={editor}/>
+          <SyncScrollContainer style={{ overflow: 'scroll' }}>
+            <MarkdownEditor
+              value={markdown}
+              onChange={this.onEditorChange}
+              onSave={this.onEditorSave}
+              onInit={editor => this.setState({ editor })}
+            />
+          </SyncScrollContainer>
+        </div>
         {!splitView ? null : (
           <SyncScrollContainer containerClassName={styles.editor_container_split}>
             <MarkdownView
@@ -94,8 +106,8 @@ class Editor extends PureComponent<EditorProps, EditorState> {
       this.setState({ document })
     } else {
       // edit existed document
-      const document = await fetchDocument(id!)
-      if (document) this.setState({ document })
+      const { document, tags } = await fetchDocument(id!)
+      if (document) this.setState({ document, tags })
     }
   }
 
@@ -120,21 +132,24 @@ class Editor extends PureComponent<EditorProps, EditorState> {
   @Bind()
   private async onEditorSave (markdown?: string) {
     if (this.state.document) {
-      const { createNew, history, updateDocument, createDocument } = this.props
+      const { createNew, history, updateDocument, updateDocumentTags, createDocument } = this.props
       if (markdown) {
         this.setState({ document: { ...this.state.document, markdown } })
       }
-      const document = this.state.document
+      const { document, tags } = this.state
       try {
         if (createNew) {
           // call create document
           const createdDocument = await createDocument(document)
+          await updateDocumentTags(createdDocument.id, tags)
           history.push(`/editor/${createdDocument.id}`)
         } else {
           // call update document
-          await updateDocument(document)
+          await Promise.all([
+            updateDocument(document),
+            updateDocumentTags(document.id, tags),
+          ])
         }
-        this.setState({ detailModalVisible: false })
         message.success('document is saved successfully')
       } catch (e) {
         message.error(e.message)
@@ -152,6 +167,7 @@ export default withRouter(
   }), {
     fetchDocument,
     updateDocument,
+    updateDocumentTags,
     createDocument,
   })(
     Editor,

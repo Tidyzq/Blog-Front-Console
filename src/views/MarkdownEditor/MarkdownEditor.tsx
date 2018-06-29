@@ -11,9 +11,14 @@ export interface MarkdownEditorProps {
   onChange?: (value: string) => void,
   onSave?: (value: string) => void,
   onDrop?: (e: DragEvent) => Promise<string | null>
+  onInit?: (editor: CodeMirror.Editor) => any,
 }
 
-export interface MarkdownEditorState { }
+export interface MarkdownEditorState {
+  editor: CodeMirror.Editor | null
+}
+
+export { Editor } from 'codemirror'
 
 // proxy save command
 (CodeMirror as any).commands.save = (instance: CodeMirror.Editor) => {
@@ -22,8 +27,11 @@ export interface MarkdownEditorState { }
 
 class MarkdownEditor extends PureComponent<MarkdownEditorProps, MarkdownEditorState> {
 
+  public state: MarkdownEditorState = {
+    editor: null,
+  }
+
   private editorContainer: HTMLTextAreaElement | null = null
-  private editor: CodeMirror.Editor | null = null
 
   public render () {
     return (
@@ -33,9 +41,10 @@ class MarkdownEditor extends PureComponent<MarkdownEditorProps, MarkdownEditorSt
     )
   }
 
-  public componentWillReceiveProps (nextProps: MarkdownEditorProps) {
-    const { value } = nextProps
-    if (this.editor && this.editor.getValue() !== value) this.editor.setValue(value)
+  public componentDidUpdate () {
+    const { value } = this.props
+    const { editor } = this.state
+    if (editor && editor.getValue() !== value) editor.setValue(value)
   }
 
   private getCodeMirrorSettings () {
@@ -52,10 +61,13 @@ class MarkdownEditor extends PureComponent<MarkdownEditorProps, MarkdownEditorSt
   @Bind()
   private updateEditorContainer (editorContainer: HTMLTextAreaElement | null) {
     this.editorContainer = editorContainer
+    const { onInit } = this.props
     if (this.editorContainer) {
       const codeMirrorSettings = this.getCodeMirrorSettings()
-      this.editor = CodeMirror.fromTextArea(this.editorContainer, codeMirrorSettings)
-      this.initializeEditor(this.editor)
+      const editor = CodeMirror.fromTextArea(this.editorContainer, codeMirrorSettings)
+      this.initializeEditor(editor)
+      if (onInit) onInit(editor)
+      this.setState({ editor })
     }
   }
 
@@ -85,6 +97,8 @@ class MarkdownEditor extends PureComponent<MarkdownEditorProps, MarkdownEditorSt
         }
       }
     })
+    // set initial value
+    editor.setValue(this.props.value)
   }
 }
 

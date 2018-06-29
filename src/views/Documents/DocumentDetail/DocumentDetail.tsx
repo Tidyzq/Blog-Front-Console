@@ -2,22 +2,24 @@ import React, { PureComponent, Fragment } from 'react'
 import { Link, withRouter, RouteComponentProps } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { message } from 'antd'
-import { Bind } from 'lodash-decorators'
 
-import MarkdownView from '@/components/MarkdownView'
+import MarkdownView from '@/views/MarkdownView'
 import DocumentDetailModal from '@/views/Documents/DocumentDetailModal'
+import withComputedProps from '@/components/withComputedProps'
 import { Document } from '@/models'
 import { State } from '@/store'
-import { fetchDocument, updateDocument } from '@/store/actions/documents'
+import { fetchDocument, updateDocument, updateDocumentTags } from '@/store/actions/documents'
 import { Breadcrumb, BreadcrumbItem, Portal as HeaderPortal, Button as HeaderButton } from '@/views/Header'
 
-import { documentSelector } from './selector'
+import { documentSelector, tagsSelector } from './selector'
 
 export interface DocumentDetailProps extends RouteComponentProps<{ id: string }> {
   id: number,
   document: Document | undefined,
+  tags: number[],
   fetchDocument: typeof fetchDocument,
   updateDocument: typeof updateDocument,
+  updateDocumentTags: typeof updateDocumentTags,
 }
 
 export interface DocumentDetailState {
@@ -44,7 +46,7 @@ class DocumentDetail extends PureComponent<DocumentDetailProps, DocumentDetailSt
   }
 
   public render () {
-    const { document, id } = this.props
+    const { document, tags, id } = this.props
     return (
       <Fragment>
         <HeaderPortal>
@@ -57,6 +59,7 @@ class DocumentDetail extends PureComponent<DocumentDetailProps, DocumentDetailSt
         </HeaderPortal>
         <DocumentDetailModal
           document={document}
+          tags={tags}
           onClose={() => this.setState({ detailModalVisible: false })}
           visible={this.state.detailModalVisible}
           onSubmit={this.onDetailSubmit}
@@ -70,11 +73,13 @@ class DocumentDetail extends PureComponent<DocumentDetailProps, DocumentDetailSt
     )
   }
 
-  @Bind()
-  private async onDetailSubmit (document: Document) {
-    const { updateDocument } = this.props
+  private onDetailSubmit = async (document: Document, tags: number[]) => {
+    const { updateDocument, updateDocumentTags } = this.props
     try {
-      await updateDocument(document)
+      await Promise.all([
+        updateDocument(document),
+        updateDocumentTags(document.id, tags),
+      ])
       this.setState({ detailModalVisible: false })
       message.success('document is saved successfully')
     } catch (e) {
@@ -85,15 +90,16 @@ class DocumentDetail extends PureComponent<DocumentDetailProps, DocumentDetailSt
 }
 
 export default withRouter(
-  connect((state: State, ownProps: RouteComponentProps<{ id: string }>) => {
-    const id = parseInt(ownProps.match.params.id, 10)
-    return {
-      id,
+  withComputedProps((ownProps: RouteComponentProps<{ id: string }>) => ({
+    id: parseInt(ownProps.match.params.id, 10),
+  }))(
+    connect((state: State, { id }: { id: number }) => ({
       document: documentSelector(state)(id),
-    }
-  }, {
-    fetchDocument,
-    updateDocument,
-  })(DocumentDetail),
+      tags: tagsSelector(state)(id),
+    }), {
+      fetchDocument,
+      updateDocument,
+      updateDocumentTags,
+    })(DocumentDetail),
+  ),
 )
-

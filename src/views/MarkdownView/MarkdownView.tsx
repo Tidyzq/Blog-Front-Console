@@ -1,5 +1,5 @@
 import React, { StatelessComponent } from 'react'
-import * as Markdown from '@/utils/markdown'
+import { render } from '@/utils/markdown'
 import styles from '@/styles/markdown.scss'
 import withDefaultProps from '@/components/withDefaultProps'
 
@@ -12,7 +12,7 @@ const renderMarkdownIntoContent = (() => {
   return (content: HTMLElement | null, markdown: string) => {
     if (content && (!content.innerHTML || prevMarkdown !== markdown)) {
       prevMarkdown = markdown
-      content.innerHTML = Markdown.render(Markdown.parse(markdown))
+      content.innerHTML = render(markdown)
     }
   }
 })()

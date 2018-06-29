@@ -1,6 +1,6 @@
 import React, { ComponentType, PureComponent } from 'react'
 import { Bind } from 'lodash-decorators'
-import { Omit } from '@/utils/tsHelper'
+import { getDisplayName } from '@/utils/react'
 
 export interface WithTimeComponentProps {
   timer: number
@@ -39,6 +39,7 @@ const withTime = (interval: number) => <P extends WithTimeComponentProps>(Comp: 
   type props = Omit<P, keyof WithTimeComponentProps>
   const { watchTimer, unwatchTimer } = getTimerWatcher(interval)
   class Timer extends PureComponent<props, WithTimeComponentProps> {
+    public static displayName = `withTime(${getDisplayName(Comp)})`
     public state: WithTimeComponentProps = { timer: getTimeInMilliSeconds() }
     public componentDidMount () { watchTimer(this.onTimer) }
     public componentWillUnmount () { unwatchTimer(this.onTimer) }

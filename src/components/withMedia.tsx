@@ -1,8 +1,8 @@
 import React, { PureComponent, ComponentType } from 'react'
 import { Bind } from 'lodash-decorators'
 
-import { Omit } from '@/utils/tsHelper'
-import { MediaType, watchMedia } from '@/utils'
+import { MediaType, watchMedia } from '@/utils/media'
+import { getDisplayName } from '@/utils/react'
 
 export interface MediaComponentProps {
   media: MediaType,
@@ -13,6 +13,8 @@ const withMedia = <P extends MediaComponentProps>(Comp: ComponentType<P>) => {
   const mediaInfo = watchMedia()
 
   class WithMediaWrapper extends PureComponent<props, MediaComponentProps> {
+
+    public static displayName = `withMedia(${getDisplayName(Comp)})`
 
     public state: MediaComponentProps = {
       media: mediaInfo.media,

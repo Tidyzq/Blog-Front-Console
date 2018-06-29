@@ -1,5 +1,5 @@
 import { user as userAPI } from '@/api'
-import { createThunkAction } from '@/utils/reduxHelper'
+import { createThunkAction } from '@/utils/redux'
 import { User } from '@/models'
 import { createThunkActionWithAccessToken } from './login'
 import { updateUserEntity } from './entities'

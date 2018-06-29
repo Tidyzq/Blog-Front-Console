@@ -32,21 +32,25 @@ const Markdown = MarkdownIt({
 
 Markdown.use(MarkdownMathPlugin, Katex)
 
-export function parse (src: string, env = {}) {
+export function parse (src: string, env: any = {}) {
   return Markdown.parse(src, env)
 }
 
-export function render (ast: MarkdownIt.Token[], env: any = {}) {
+export function renderAST (ast: MarkdownIt.Token[], env: any = {}) {
   return Markdown.renderer.render(ast, (Markdown as any).options, env)
 }
 
-export function renderText (ast: MarkdownIt.Token[], env: any = {}) {
+export function render (src: string, env: any = {}) {
+  return renderAST(parse(src, env), env)
+}
+
+export function renderTextAST (ast: MarkdownIt.Token[], env: any = {}) {
   let result = ''
   const { limit = 0 } = env
   for (let i = 0, len = ast.length; i < len; i++) {
     const token = ast[i]
     if (token.children) {
-      result += renderText(token.children, { limit: limit ? limit - result.length : 0 })
+      result += renderTextAST(token.children, { limit: limit ? limit - result.length : 0 })
     } else {
       result += token.content
     }
@@ -55,4 +59,8 @@ export function renderText (ast: MarkdownIt.Token[], env: any = {}) {
     if (!result.endsWith(' '))  result += ' '
   }
   return result
+}
+
+export function renderText (src: string, env: any = {}) {
+  return renderTextAST(parse(src, env), env)
 }
