@@ -1,8 +1,8 @@
 import React, { PureComponent, Fragment } from 'react'
-import { Editor } from 'codemirror'
 
 import { Image } from '@/models'
 import SelectImageModal from '@/views/SelectImageModal'
+import { Editor } from '@/views/MarkdownEditor'
 import withComputedProps from '@/components/withComputedProps'
 
 import ToolbarItem, { ToolbarItemProps } from '../ToolbarItem'

@@ -56,13 +56,15 @@ class Editor extends PureComponent<EditorProps, EditorState> {
           <Button onClick={() => this.setState({ detailModalVisible: true })}>Detail</Button>
           <Button type="primary" onClick={() => this.onEditorSave()}>Save</Button>
         </HeaderPortal>
-        <DocumentDetailModal
-          document={document}
-          tags={tags}
-          visible={this.state.detailModalVisible}
-          onSubmit={(document, tags) => this.setState({ document, tags, detailModalVisible: false })}
-          onClose={() => this.setState({ detailModalVisible: false })}
-        />
+        {document === undefined ? null : (
+          <DocumentDetailModal
+            document={document}
+            tags={tags}
+            visible={this.state.detailModalVisible}
+            onSubmit={(document, tags) => this.setState({ document, tags, detailModalVisible: false })}
+            onClose={() => this.setState({ detailModalVisible: false })}
+          />
+        )}
         <div className={splitView ? styles.editor_container_split : styles.editor_container} style={{ display: 'flex', flexDirection: 'column' }}>
           <Toolbar editor={editor}/>
           <SyncScrollContainer style={{ overflow: 'scroll' }}>

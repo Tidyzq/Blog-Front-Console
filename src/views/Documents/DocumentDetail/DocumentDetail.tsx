@@ -57,13 +57,15 @@ class DocumentDetail extends PureComponent<DocumentDetailProps, DocumentDetailSt
           <HeaderButton onClick={() => this.setState({ detailModalVisible: true })}>Detail</HeaderButton>
           <HeaderButton type="primary"><Link to={`/editor/${id}`}>Edit</Link></HeaderButton>
         </HeaderPortal>
-        <DocumentDetailModal
-          document={document}
-          tags={tags}
-          onClose={() => this.setState({ detailModalVisible: false })}
-          visible={this.state.detailModalVisible}
-          onSubmit={this.onDetailSubmit}
-        />
+        {document === undefined ? null :(
+          <DocumentDetailModal
+            document={document}
+            tags={tags}
+            onClose={() => this.setState({ detailModalVisible: false })}
+            visible={this.state.detailModalVisible}
+            onSubmit={this.onDetailSubmit}
+          />
+        )}
         {document === undefined ? null : (
           <MarkdownView
             value={document.markdown}

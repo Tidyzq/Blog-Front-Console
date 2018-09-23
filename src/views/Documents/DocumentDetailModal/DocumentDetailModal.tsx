@@ -4,6 +4,7 @@ import { withRouter, RouteComponentProps } from 'react-router'
 import { Modal, Form, Input, Select, Button, Divider, message } from 'antd'
 import { FormComponentProps } from 'antd/lib/form'
 import { mapValues } from 'lodash'
+import { Bind } from 'lodash-decorators'
 
 import { Document, Tag } from '@/models'
 import withDefaultProps from '@/components/withDefaultProps'
@@ -14,7 +15,7 @@ import { State } from '@/store'
 import { tagsSelector } from './selector'
 
 export interface DocumentDetailModalProps extends FormComponentProps, RouteComponentProps<{}> {
-  document: Document | undefined
+  document: Document
   tags: number[]
   tagsMap: { [id: number]: Tag | undefined }
   visible: boolean
@@ -65,15 +66,13 @@ class DocumentDetail extends PureComponent<DocumentDetailModalProps, DocumentDet
       visible,
       onClose,
       onSubmit,
-      deleteDocument,
       form: {
         getFieldDecorator,
         getFieldsValue,
       },
-      history,
     } = this.props
     const { tagIds } = this.state
-    return document === undefined ? null : (
+    return (
       <Modal
         title={document.title}
         visible={visible}
@@ -116,21 +115,7 @@ class DocumentDetail extends PureComponent<DocumentDetailModalProps, DocumentDet
             <Button
               type="danger"
               style={{ width: '100%' }}
-              onClick={() => {
-                Modal.confirm({
-                  content: `Are you sure to delete document "${document.title}"?`,
-                  onOk: async () => {
-                    try {
-                      await deleteDocument(document.id)
-                      message.success(`Document "${document.title}" has been deleted`)
-                      history.push('/documents')
-                    } catch (e) {
-                      message.error(e.message)
-                      console.error(e)
-                    }
-                  },
-                })
-              }}
+              onClick={this.onDeleteClick}
             >
               Delete
             </Button>
@@ -138,6 +123,24 @@ class DocumentDetail extends PureComponent<DocumentDetailModalProps, DocumentDet
         </Form>
       </Modal>
     )
+  }
+
+  @Bind()
+  private onDeleteClick () {
+    const { history, deleteDocument, document } = this.props
+    Modal.confirm({
+      content: `Are you sure to delete document "${document.title}"?`,
+      onOk: async () => {
+        try {
+          await deleteDocument(document.id)
+          message.success(`Document "${document.title}" has been deleted`)
+          history.push('/documents')
+        } catch (e) {
+          message.error(e.message)
+          console.error(e)
+        }
+      },
+    })
   }
 
   private async fetchTags () {

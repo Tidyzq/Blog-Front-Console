@@ -1,5 +1,6 @@
 import React, { StatelessComponent } from 'react'
-import { Editor } from 'codemirror'
+
+import { Editor } from '@/views/MarkdownEditor'
 
 import InsertImage from './ToolbarItems/InsertImage'
 

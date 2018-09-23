@@ -1,6 +1,7 @@
 import React, { StatelessComponent } from 'react'
-import { Editor } from 'codemirror'
 import { Button } from 'antd'
+
+import { Editor } from '@/views/MarkdownEditor'
 import Icon from '@/components/Icon'
 
 export interface ToolbarItemProps {
