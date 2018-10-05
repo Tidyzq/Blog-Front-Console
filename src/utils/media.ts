@@ -54,7 +54,7 @@ export const watchMedia = (() => {
         media = m
         listeners.forEach(listener => listener(media))
       }
-      const getResponsiveHandler = (dimension: Dimension) => (mql: MediaQueryList) =>
+      const getResponsiveHandler = (dimension: Dimension) => (mql: { matches: boolean }) =>
         setMedia(mql.matches ?
           Math.min(media, dimension.below) :
           Math.max(media, dimension.above),

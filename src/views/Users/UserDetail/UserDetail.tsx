@@ -135,7 +135,7 @@ class UserDetail extends PureComponent<UserDetailProps, UserDetailState> {
   private validateFields () {
     const { form: { validateFields } } = this.props
     return new Promise<User>((resolve, reject) => {
-      validateFields((errors, values: User) => {
+      validateFields((errors: any, values: User) => {
         if (errors) return reject(errors)
         resolve(values)
       })
@@ -182,7 +182,7 @@ export default withRouter(
     const id = parseInt(ownProps.match.params.id, 10)
     const user = userSelector(state)(id)
     const loginUser = loginUserSelector(state)
-    const isSelf = user && loginUser && user.id === loginUser.id
+    const isSelf = Boolean(user && loginUser && user.id === loginUser.id)
     return {
       id,
       user,

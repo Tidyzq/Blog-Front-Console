@@ -1,26 +1,44 @@
 {
   "presets": [
-    "react-app"
+    "@babel/preset-react",
+    "@babel/preset-typescript"
   ],
   "plugins": [
+    "@babel/plugin-syntax-dynamic-import",
     [
+      "@babel/plugin-proposal-decorators",
+      {
+        "legacy": true
+      }
+    ],
+    [
+      "@babel/plugin-proposal-class-properties",
+      {
+        "loose": true
+      }
+    ], [
       "import",
-      [
-        {
-          "libraryName": "antd",
-          "style": "css"
-        },
-        {
-          "libraryName": "lodash",
-          "libraryDirectory": "",
-          "camel2DashComponentName": false,
-          "camel2UnderlineComponentName": false
-        },
-        {
-          "libraryName": "lodash-decorators",
-          "libraryDirectory": ""
-        }
-      ]
+      {
+        "libraryName": "antd",
+        "style": "css"
+      },
+      "import-antd"
+    ], [
+      "import",
+      {
+        "libraryName": "lodash",
+        "libraryDirectory": "",
+        "camel2DashComponentName": false,
+        "camel2UnderlineComponentName": false
+      },
+      "import-lodash"
+    ], [
+      "import",
+      {
+        "libraryName": "lodash-decorators",
+        "libraryDirectory": ""
+      },
+      "import-lodash-decorators"
     ]
   ]
 }

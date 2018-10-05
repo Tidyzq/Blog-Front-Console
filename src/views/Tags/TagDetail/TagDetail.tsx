@@ -110,7 +110,7 @@ class TagDetail extends PureComponent<TagDetailProps, TagDetailState> {
   private validateFields () {
     const { form: { validateFields } } = this.props
     return new Promise<Tag>((resolve, reject) => {
-      validateFields((errors, values: Tag) => {
+      validateFields((errors: any, values: Tag) => {
         if (errors) return reject(errors)
         resolve(values)
       })

@@ -34,7 +34,7 @@ const Settings: StatelessComponent<SettingsProps> =
         <BreadcrumbItem>Settings</BreadcrumbItem>
       </Breadcrumb>
       <HeaderButton type="primary" onClick={() => {
-        validateFields(async (errors, values: Setting) => {
+        validateFields(async (errors: any, values: Setting) => {
           if (errors) return
           try {
             await updateSettings(values)

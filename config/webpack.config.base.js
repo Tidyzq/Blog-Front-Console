@@ -1,6 +1,6 @@
 const path = require('path')
 const webpack = require('webpack')
-const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin')
+// const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin')
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
@@ -69,7 +69,7 @@ const generateStyleLoader = (loaders = []) => styleLoaderResolver(
 // It is focused on developer experience and fast rebuilds.
 // The production configuration is different and lives in a separate file.
 module.exports = {
-  mode: 'none',
+  mode: isProduction ? 'production' : 'development',
   entry: [ require.resolve('./polyfills'), ...paths.appEntries ],
   output: {
     // The build folder.
@@ -114,37 +114,38 @@ module.exports = {
       // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
       // please link the files into your node_modules/ and let module-resolution kick in.
       // Make sure your source files are compiled, as they will not be processed in any way.
-      new ModuleScopePlugin(paths.appSrc, [ paths.appPackageJson ]),
+      // new ModuleScopePlugin(paths.appSrc, [ paths.appPackageJson ]),
       new TsconfigPathsPlugin({ configFile: paths.appTsConfig }),
     ],
   },
   module: {
     strictExportPresence: true,
     rules: [
-      // TODO: Disable require.ensure as it's not a standard language feature.
-      // We are waiting for https://github.com/facebookincubator/create-react-app/issues/2176.
-      // { parser: { requireEnsure: false } },
-      // Process JS with Babel.
-      {
-        test: /\.(tsx?|jsx?|mjs)$/,
-        enforce: 'post',
-        include: paths.appSrc,
-        loader: require.resolve('babel-loader'),
-        options: {
-
-          // This is a feature of `babel-loader` for webpack (not Babel itself).
-          // It enables caching results in ./node_modules/.cache/babel-loader/
-          // directory for faster rebuilds.
-          cacheDirectory: isDevelopment,
-          compact: isProduction,
-          babelrc: paths.appBabelConfig,
-        },
-      },
       {
         // "oneOf" will traverse all following loaders until one will
         // match the requirements. When no loader matches it will fall
         // back to the "file" loader at the end of the loader list.
         oneOf: [
+          // TODO: Disable require.ensure as it's not a standard language feature.
+          // We are waiting for https://github.com/facebookincubator/create-react-app/issues/2176.
+          // { parser: { requireEnsure: false } },
+          // Process JS with Babel.
+          {
+            test: /\.(tsx?|jsx?|mjs)$/,
+            // enforce: 'post',
+            include: paths.appSrc,
+            loader: require.resolve('babel-loader'),
+            options: {
+
+              // This is a feature of `babel-loader` for webpack (not Babel itself).
+              // It enables caching results in ./node_modules/.cache/babel-loader/
+              // directory for faster rebuilds.
+              cacheDirectory: isDevelopment,
+              compact: isProduction,
+              // babelrc: paths.appBabelConfig,
+              babelrc: true,
+            },
+          },
           // "url" loader works like "file" loader except that it embeds assets
           // smaller than specified limit in bytes as data URLs to avoid requests.
           // A missing `test` is equivalent to a match.
@@ -157,18 +158,18 @@ module.exports = {
             },
           },
           // Compile .tsx?
-          {
-            test: /\.tsx?$/,
-            include: paths.appSrc,
-            use: {
-              loader: require.resolve('ts-loader'),
-              options: {
-                // disable type checker - we will use it in fork plugin
-                transpileOnly: true,
-                configFile: paths.appTsConfig,
-              },
-            },
-          },
+          // {
+          //   test: /\.tsx?$/,
+          //   include: paths.appSrc,
+          //   use: {
+          //     loader: require.resolve('ts-loader'),
+          //     options: {
+          //       // disable type checker - we will use it in fork plugin
+          //       transpileOnly: true,
+          //       configFile: paths.appTsConfig,
+          //     },
+          //   },
+          // },
           // Compile .css to CSS Module
           {
             test: /\.css$/,
@@ -263,22 +264,22 @@ module.exports = {
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     // Perform type checking and linting in a separate process to speed up compilation
     new ForkTsCheckerWebpackPlugin({
-      async: false,
+      // async: false,
       watch: isDevelopment ? paths.appSrc : undefined,
       tsconfig: paths.appTsConfig,
       tslint: paths.appTsLint,
       workers: ForkTsCheckerWebpackPlugin.TWO_CPUS_FREE,
     }),
     // monaco-editor
-    new webpack.IgnorePlugin(/^((fs)|(path)|(os)|(crypto)|(source-map-support))$/, /vs\/language\/typescript\/lib/),
+    // new webpack.IgnorePlugin(/^((fs)|(path)|(os)|(crypto)|(source-map-support))$/, /vs\/language\/typescript\/lib/),
   ],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
-  node: {
-    dgram: 'empty',
-    fs: 'empty',
-    net: 'empty',
-    tls: 'empty',
-    child_process: 'empty',
-  },
+  // node: {
+  //   dgram: 'empty',
+  //   fs: 'empty',
+  //   net: 'empty',
+  //   tls: 'empty',
+  //   child_process: 'empty',
+  // },
 }

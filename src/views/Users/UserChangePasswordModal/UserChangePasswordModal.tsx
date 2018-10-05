@@ -20,7 +20,7 @@ const UserChangePasswordModal: StatelessComponent<UserChangePasswordModalProps> 
     visible={visible}
     onCancel={onClose}
     onOk={() => {
-      validateFields(async (errors, { newPassword, oldPassword }: { newPassword: string, oldPassword: string }) => {
+      validateFields(async (errors: any, { newPassword, oldPassword }: { newPassword: string, oldPassword: string }) => {
         try {
           if (errors) throw errors
           await changeUserPassword(user.id, newPassword, oldPassword)

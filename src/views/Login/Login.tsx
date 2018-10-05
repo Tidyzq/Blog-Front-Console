@@ -20,7 +20,7 @@ const Login = (({ accessToken, login, form: { getFieldDecorator, validateFields 
   accessToken === undefined ? (
     <Row className={styles.row} type="flex" justify="center" align="middle">
       <Col xs={20} sm={18} md={16} lg={12} xl={10}>
-        <Form onSubmit={e => { e.preventDefault(); validateFields((err, values) => err || login(values)) }}>
+        <Form onSubmit={e => { e.preventDefault(); validateFields((err: any, values: any) => err || login(values)) }}>
           <Form.Item>
             {getFieldDecorator('email', {
               rules: [{ required: true, message: 'Please input your email!' }],
